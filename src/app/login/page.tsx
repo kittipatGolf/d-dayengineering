@@ -1,4 +1,4 @@
- "use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -15,31 +15,21 @@ export default function LoginPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">
               D-Day Engineering
             </p>
-            <h2 className="mt-4 text-3xl font-bold leading-tight">
-              Welcome Back
-            </h2>
+            <h2 className="mt-4 text-3xl font-bold leading-tight">Welcome Back</h2>
             <p className="mt-3 max-w-sm text-sm text-cyan-100/90">
-              เข้าสู่ระบบเพื่อจัดการข้อมูลลูกค้า ติดตามงานซ่อม และดูสถานะงานติดตั้งแบบ
-              real-time
+              เข้าสู่ระบบเพื่อจัดการข้อมูลลูกค้า ติดตามงานซ่อม และดูสถานะงานติดตั้งแบบ real-time
             </p>
           </div>
-          <p className="text-xs text-cyan-100/80">
-            Smart service workflow for professional shutter teams.
-          </p>
+          <p className="text-xs text-cyan-100/80">Smart service workflow for professional shutter teams.</p>
         </div>
 
         <div className="p-8 md:p-10">
           <h1 className="text-2xl font-bold text-slate-900">Login</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            กรุณากรอกข้อมูลเพื่อเข้าสู่ระบบ
-          </p>
+          <p className="mt-1 text-sm text-slate-500">กรุณากรอกข้อมูลเพื่อเข้าสู่ระบบ</p>
 
           <form className="mt-8 space-y-4">
             <div>
-              <label
-                htmlFor="username"
-                className="mb-1 block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="username" className="mb-1 block text-sm font-medium text-slate-700">
                 ชื่อผู้ใช้
               </label>
               <input
@@ -51,10 +41,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="mb-1 block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
                 รหัสผ่าน
               </label>
               <div className="relative">
@@ -70,11 +57,7 @@ export default function LoginPage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700"
                   aria-label={showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
                 >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5" />
-                  )}
+                  {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                 </button>
               </div>
             </div>
@@ -96,16 +79,10 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 flex items-center justify-between text-sm">
-            <Link
-              href="/contact"
-              className="text-sky-700 underline hover:text-sky-800"
-            >
+            <Link href="/register" className="text-sky-700 underline hover:text-sky-800">
               สมัครสมาชิก?
             </Link>
-            <Link
-              href="/contact"
-              className="text-sky-700 underline hover:text-sky-800"
-            >
+            <Link href="/contact" className="text-sky-700 underline hover:text-sky-800">
               ลืมรหัสผ่าน?
             </Link>
           </div>
