@@ -1,20 +1,41 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const trimmedUsername = username.trim();
+
+    if (trimmedUsername === "admin" && password === "admin1234") {
+      router.push("/homeadmin");
+      return;
+    }
+
+    if (trimmedUsername === "user" && password === "user1234") {
+      router.push("/");
+      return;
+    }
+
+    setErrorMessage("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+  }
 
   return (
     <section className="grid min-h-[75vh] place-items-center py-4">
       <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl md:grid-cols-2">
         <div className="hidden flex-col justify-between bg-gradient-to-br from-slate-900 via-sky-900 to-cyan-700 p-10 text-white md:flex">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">
-              D-Day Engineering
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">D-Day Engineering</p>
             <h2 className="mt-4 text-3xl font-bold leading-tight">Welcome Back</h2>
             <p className="mt-3 max-w-sm text-sm text-cyan-100/90">
               เข้าสู่ระบบเพื่อจัดการข้อมูลลูกค้า ติดตามงานซ่อม และดูสถานะงานติดตั้งแบบ real-time
@@ -27,7 +48,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-slate-900">Login</h1>
           <p className="mt-1 text-sm text-slate-500">กรุณากรอกข้อมูลเพื่อเข้าสู่ระบบ</p>
 
-          <form className="mt-8 space-y-4">
+          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="username" className="mb-1 block text-sm font-medium text-slate-700">
                 ชื่อผู้ใช้
@@ -36,6 +57,11 @@ export default function LoginPage() {
                 id="username"
                 type="text"
                 placeholder="กรอกชื่อผู้ใช้"
+                value={username}
+                onChange={(event) => {
+                  setUsername(event.target.value);
+                  setErrorMessage("");
+                }}
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
               />
             </div>
@@ -49,6 +75,11 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="กรอกรหัสผ่าน"
+                  value={password}
+                  onChange={(event) => {
+                    setPassword(event.target.value);
+                    setErrorMessage("");
+                  }}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 pr-11 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
                 />
                 <button
@@ -76,13 +107,15 @@ export default function LoginPage() {
             >
               เข้าสู่ระบบ
             </button>
+            {errorMessage ? <p className="text-sm text-red-600">{errorMessage}</p> : null}
+            <p className="text-xs text-slate-500">ทดสอบชั่วคราว: user/user1234 หรือ admin/admin1234</p>
           </form>
 
           <div className="mt-6 flex items-center justify-between text-sm">
             <Link href="/register" className="text-sky-700 underline hover:text-sky-800">
               สมัครสมาชิก?
             </Link>
-            <Link href="/contact" className="text-sky-700 underline hover:text-sky-800">
+            <Link href="/requestreset" className="text-sky-700 underline hover:text-sky-800">
               ลืมรหัสผ่าน?
             </Link>
           </div>

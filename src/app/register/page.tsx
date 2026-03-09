@@ -220,10 +220,14 @@ export default function RegisterPage() {
                 {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
               </button>
             </div>
-            <div className="mt-2 h-2 rounded bg-slate-200">
-              <div className={`h-full rounded transition-all duration-200 ${passwordStrengthClass}`} />
-            </div>
-            <p className="mt-1 text-sm text-slate-600">{passwordHint}</p>
+            {form.password ? (
+              <>
+                <div className="mt-2 h-2 rounded bg-slate-200">
+                  <div className={`h-full rounded transition-all duration-200 ${passwordStrengthClass}`} />
+                </div>
+                <p className="mt-1 text-sm text-slate-600">{passwordHint}</p>
+              </>
+            ) : null}
             {errors.password ? <p className="mt-1 text-sm text-red-600">{errors.password}</p> : null}
           </div>
 
