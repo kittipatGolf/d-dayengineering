@@ -9,17 +9,23 @@ export type ProductItem = {
   kind: CategoryKind;
   categoryId: string;
   categoryName: string;
-  price: number;
-  color: string;
+  price: number | null;
+  colors: string[];
+  description: string;
+  warrantyYears: string;
   images: string[];
   status: ProductStatus;
   updatedAt: string;
 };
 
 export type ProductFormState = {
+  productType: CategoryKind;
   name: string;
   categoryId: string;
   price: string;
-  color: string;
+  colors: string[];
+  description: string;
+  warrantyYears: string;
+  isSelling: boolean;
   images: string[];
 };

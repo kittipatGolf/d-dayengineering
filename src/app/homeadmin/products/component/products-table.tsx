@@ -1,4 +1,6 @@
 ﻿import { PencilSquareIcon, PhotoIcon, TagIcon } from "@heroicons/react/24/outline";
+import { FilterTabs } from "../../components/admin-shared/filter-tabs";
+import { ListHeaderActions } from "../../components/admin-shared/list-header-actions";
 import type { ProductItem, ProductTab } from "./types";
 
 type ProductsTableProps = {
@@ -7,8 +9,29 @@ type ProductsTableProps = {
   onTabChange: (tab: ProductTab) => void;
   onToggleStatus: (id: string) => void;
   onEdit: (id: string) => void;
+  onAddNew: () => void;
   toCurrency: (value: number) => string;
 };
+
+const colorMap: Record<string, string> = {
+  ขาว: "#ffffff",
+  ครีม: "#f5f0da",
+  เทาเข้ม: "#4b5563",
+  ดำ: "#111827",
+  น้ำเงิน: "#1d4ed8",
+  แดง: "#ef4444",
+  เขียว: "#16a34a",
+  เงิน: "#9ca3af",
+};
+
+function resolveColorValue(color: string) {
+  const trimmed = color.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("#") || trimmed.startsWith("rgb") || trimmed.startsWith("hsl")) {
+    return trimmed;
+  }
+  return colorMap[trimmed] ?? "#94a3b8";
+}
 
 export function ProductsTable({
   rows,
@@ -16,33 +39,23 @@ export function ProductsTable({
   onTabChange,
   onToggleStatus,
   onEdit,
+  onAddNew,
   toCurrency,
 }: ProductsTableProps) {
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <TagIcon className="h-5 w-5 text-slate-500" />
-          <h2 className="text-base font-semibold text-slate-900">รายการสินค้า</h2>
-        </div>
+      <ListHeaderActions
+        title="รายการสินค้า"
+        icon={TagIcon}
+        addLabel="เพิ่มสินค้า"
+        onAdd={onAddNew}
+      />
 
-        <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1 text-sm">
-          {(["ทั้งหมด", "ประตูม้วน", "อะไหล่ประตูม้วน"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => onTabChange(tab)}
-              className={`rounded-lg px-3 py-1.5 transition ${
-                activeTab === tab
-                  ? "bg-white font-semibold text-blue-900 shadow-sm"
-                  : "text-slate-600"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
+      <FilterTabs
+        options={["ทั้งหมด", "ประตูม้วน", "อะไหล่ประตูม้วน"] as const}
+        value={activeTab}
+        onChange={onTabChange}
+      />
 
       <div className="mt-4 overflow-x-auto">
         <table className="min-w-full text-left text-sm">
@@ -76,8 +89,28 @@ export function ProductsTable({
                   </div>
                 </td>
                 <td className="px-3 py-3 text-slate-700">{item.categoryName}</td>
-                <td className="px-3 py-3 font-semibold text-slate-900">{toCurrency(item.price)} บาท</td>
-                <td className="px-3 py-3 text-slate-700">{item.color}</td>
+                <td className="px-3 py-3 font-semibold text-slate-900">
+                  {item.kind === "ประตูม้วน" ? "ราคาตามขนาด" : `${toCurrency(item.price ?? 0)} บาท`}
+                </td>
+                <td className="px-3 py-3 text-slate-700">
+                  {item.colors.length > 0 ? (
+                    <div className="inline-flex items-center gap-1.5">
+                      {item.colors.map((color) => {
+                        const colorValue = resolveColorValue(color);
+                        return (
+                          <span
+                            key={`${item.id}-${color}`}
+                            title={color}
+                            className="h-4 w-4 rounded-full border border-slate-300"
+                            style={{ backgroundColor: colorValue ?? "#94a3b8" }}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    "-"
+                  )}
+                </td>
                 <td className="px-3 py-3">
                   <button
                     type="button"

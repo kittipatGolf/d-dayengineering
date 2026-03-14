@@ -7,8 +7,10 @@ export const initialProducts: ProductItem[] = [
     kind: "ประตูม้วน",
     categoryId: "CAT-001",
     categoryName: "ประตูม้วนทึบ",
-    price: 2300,
-    color: "ครีม",
+    price: null,
+    colors: ["ครีม", "ขาว"],
+    description: "เหมาะสำหรับหน้าร้านทั่วไป",
+    warrantyYears: "1",
     images: [],
     status: "วางขาย",
     updatedAt: "14 มี.ค. 2026",
@@ -20,7 +22,9 @@ export const initialProducts: ProductItem[] = [
     categoryId: "CAT-003",
     categoryName: "มอเตอร์",
     price: 4200,
-    color: "-",
+    colors: [],
+    description: "อะไหล่สำหรับประตูม้วนไฟฟ้า",
+    warrantyYears: "1",
     images: [],
     status: "วางขาย",
     updatedAt: "13 มี.ค. 2026",
@@ -28,9 +32,13 @@ export const initialProducts: ProductItem[] = [
 ];
 
 export const emptyProductForm: ProductFormState = {
+  productType: "ประตูม้วน",
   name: "",
   categoryId: "",
   price: "",
-  color: "",
+  colors: [],
+  description: "",
+  warrantyYears: "",
+  isSelling: true,
   images: [],
 };

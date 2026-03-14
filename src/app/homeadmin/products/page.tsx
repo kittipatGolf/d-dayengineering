@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { initialCategories } from "../product-categories/component/mock-data";
+import type { CategoryKind } from "../product-categories/component/types";
 import { emptyProductForm, initialProducts } from "./component/mock-data";
-import { ProductForm } from "./component/product-form";
+import { ProductFormModal } from "./component/product-form";
 import { ProductStats } from "./component/product-stats";
 import { ProductsTable } from "./component/products-table";
 import type { ProductFormState, ProductItem, ProductTab } from "./component/types";
@@ -21,7 +22,7 @@ function toCurrency(value: number) {
 }
 
 export default function ProductsPage() {
-  const categoryOptions = useMemo(
+  const allActiveCategories = useMemo(
     () => initialCategories.filter((item) => item.isActive),
     [],
   );
@@ -29,10 +30,20 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<ProductItem[]>(initialProducts);
   const [activeTab, setActiveTab] = useState<ProductTab>("ทั้งหมด");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<ProductFormState>(() => ({
-    ...emptyProductForm,
-    categoryId: categoryOptions[0]?.id ?? "",
-  }));
+  const [modalOpen, setModalOpen] = useState(false);
+  const [form, setForm] = useState<ProductFormState>(() => {
+    const firstDoorCategory = allActiveCategories.find((item) => item.kind === "ประตูม้วน");
+    return {
+      ...emptyProductForm,
+      productType: "ประตูม้วน",
+      categoryId: firstDoorCategory?.id ?? "",
+    };
+  });
+
+  const categoryOptions = useMemo(
+    () => allActiveCategories.filter((item) => item.kind === form.productType),
+    [allActiveCategories, form.productType],
+  );
 
   const selectedCategory = useMemo(
     () => categoryOptions.find((item) => item.id === form.categoryId),
@@ -51,12 +62,24 @@ export default function ProductsPage() {
 
   const sellingCount = products.filter((item) => item.status === "วางขาย").length;
 
-  const resetForm = () => {
+  const resetForm = (type: CategoryKind = "ประตูม้วน") => {
+    const firstCategory = allActiveCategories.find((item) => item.kind === type);
     setEditingId(null);
     setForm({
       ...emptyProductForm,
-      categoryId: categoryOptions[0]?.id ?? "",
+      productType: type,
+      categoryId: firstCategory?.id ?? "",
     });
+  };
+
+  const openCreateModal = () => {
+    resetForm("ประตูม้วน");
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingId(null);
   };
 
   const handlePickImages = (files: FileList | null) => {
@@ -69,6 +92,29 @@ export default function ProductsPage() {
     setForm((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleProductTypeChange = (nextType: CategoryKind) => {
+    const nextCategories = allActiveCategories.filter((item) => item.kind === nextType);
+    setForm((prev) => ({
+      ...prev,
+      productType: nextType,
+      categoryId: nextCategories[0]?.id ?? "",
+      colors: [],
+      price: nextType === "ประตูม้วน" ? "" : prev.price,
+    }));
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    const nextCategory = allActiveCategories.find((item) => item.id === categoryId);
+    setForm((prev) => ({
+      ...prev,
+      categoryId,
+      colors:
+        nextCategory?.kind === "ประตูม้วน"
+          ? prev.colors.filter((color) => nextCategory.colors.includes(color))
+          : [],
     }));
   };
 
@@ -92,69 +138,59 @@ export default function ProductsPage() {
 
     setEditingId(id);
     setForm({
+      productType: target.kind,
       name: target.name,
       categoryId: target.categoryId,
-      price: String(target.price),
-      color: target.color === "-" ? "" : target.color,
+      price: target.price ? String(target.price) : "",
+      colors: target.colors,
+      description: target.description,
+      warrantyYears: target.warrantyYears,
+      isSelling: target.status === "วางขาย",
       images: target.images,
     });
+    setModalOpen(true);
   };
 
   const submitForm = () => {
     const name = form.name.trim();
+    const category = allActiveCategories.find((item) => item.id === form.categoryId);
+    const isDoor = form.productType === "ประตูม้วน";
     const price = Number(form.price);
-    const category = categoryOptions.find((item) => item.id === form.categoryId);
 
-    if (!name || !category || !Number.isFinite(price) || price <= 0) {
-      return;
-    }
+    if (!name || !category || category.kind !== form.productType) return;
+    if (isDoor && form.colors.length === 0) return;
+    if (!isDoor && (!Number.isFinite(price) || price <= 0)) return;
 
-    const isDoor = category.kind === "ประตูม้วน";
-    const color = isDoor ? form.color.trim() : "-";
-
-    if (isDoor && !color) {
-      return;
-    }
+    const nextItem = {
+      name,
+      kind: form.productType,
+      categoryId: category.id,
+      categoryName: category.name,
+      price: isDoor ? null : price,
+      colors: isDoor ? form.colors : [],
+      description: form.description.trim(),
+      warrantyYears: form.warrantyYears.trim(),
+      images: form.images,
+      status: form.isSelling ? "วางขาย" : "ยกเลิกการขาย",
+      updatedAt: formatThaiDate(),
+    } as const;
 
     if (editingId) {
       setProducts((prev) =>
-        prev.map((item) =>
-          item.id === editingId
-            ? {
-                ...item,
-                name,
-                categoryId: category.id,
-                categoryName: category.name,
-                kind: category.kind,
-                price,
-                color,
-                images: form.images,
-                updatedAt: formatThaiDate(),
-              }
-            : item,
-        ),
+        prev.map((item) => (item.id === editingId ? { ...item, ...nextItem } : item)),
       );
-      resetForm();
+      closeModal();
       return;
     }
 
     setProducts((prev) => [
       {
         id: `PD-${String(prev.length + 1).padStart(3, "0")}`,
-        name,
-        kind: category.kind,
-        categoryId: category.id,
-        categoryName: category.name,
-        price,
-        color,
-        images: form.images,
-        status: "วางขาย",
-        updatedAt: formatThaiDate(),
+        ...nextItem,
       },
       ...prev,
     ]);
-
-    resetForm();
+    closeModal();
   };
 
   return (
@@ -162,34 +198,38 @@ export default function ProductsPage() {
       <header className="rounded-2xl bg-linear-to-r from-blue-900 to-blue-700 px-5 py-5 text-white shadow-sm">
         <h1 className="text-2xl font-bold">จัดการสินค้า</h1>
         <p className="mt-1 text-sm text-blue-100">
-          เพิ่ม/แก้ไขสินค้าประตูม้วนและอะไหล่ พร้อมจัดการสถานะวางขายได้ทันที
+          เพิ่ม/แก้ไขสินค้าผ่าน modal และจัดการสถานะวางขายได้ทันที
         </p>
       </header>
 
       <ProductStats total={products.length} selling={sellingCount} />
 
-      <section className="mt-4 grid gap-4 xl:grid-cols-[1.5fr_1fr]">
+      <section className="mt-4">
         <ProductsTable
           rows={filteredProducts}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onToggleStatus={toggleProductStatus}
           onEdit={editProduct}
+          onAddNew={openCreateModal}
           toCurrency={toCurrency}
         />
-
-        <ProductForm
-          editing={Boolean(editingId)}
-          form={form}
-          categoryOptions={categoryOptions}
-          availableColors={availableColors}
-          onReset={resetForm}
-          onPickImages={handlePickImages}
-          onRemoveImage={handleRemoveImage}
-          onFormChange={setForm}
-          onSubmit={submitForm}
-        />
       </section>
+
+      <ProductFormModal
+        open={modalOpen}
+        editing={Boolean(editingId)}
+        form={form}
+        categoryOptions={categoryOptions}
+        availableColors={availableColors}
+        onClose={closeModal}
+        onProductTypeChange={handleProductTypeChange}
+        onCategoryChange={handleCategoryChange}
+        onPickImages={handlePickImages}
+        onRemoveImage={handleRemoveImage}
+        onFormChange={setForm}
+        onSubmit={submitForm}
+      />
     </div>
   );
 }

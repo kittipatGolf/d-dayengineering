@@ -6,11 +6,23 @@ import { ProductCategoriesTable } from "./component/product-categories-table";
 import { ProductCategoryForm } from "./component/product-category-form";
 import type { CategoryKind, ProductCategory } from "./component/types";
 
+function formatThaiDate(date = new Date()) {
+  return date.toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export default function ProductCategoriesPage() {
   const [categories, setCategories] = useState<ProductCategory[]>(initialCategories);
   const [activeTab, setActiveTab] = useState<"ทั้งหมด" | CategoryKind>("ทั้งหมด");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   const [name, setName] = useState("");
   const [kind, setKind] = useState<CategoryKind>("ประตูม้วน");
+  const [isActive, setIsActive] = useState(true);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [customColor, setCustomColor] = useState("");
 
@@ -21,6 +33,25 @@ export default function ProductCategoriesPage() {
 
   const totalDoor = categories.filter((item) => item.kind === "ประตูม้วน").length;
   const totalParts = categories.filter((item) => item.kind === "อะไหล่").length;
+
+  const resetForm = () => {
+    setEditingId(null);
+    setName("");
+    setKind("ประตูม้วน");
+    setIsActive(true);
+    setSelectedColors([]);
+    setCustomColor("");
+  };
+
+  const openCreateModal = () => {
+    resetForm();
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingId(null);
+  };
 
   const toggleColor = (color: string) => {
     setSelectedColors((prev) =>
@@ -46,15 +77,62 @@ export default function ProductCategoriesPage() {
           ? {
               ...item,
               isActive: !item.isActive,
-              updatedAt: new Date().toLocaleDateString("th-TH", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              }),
+              updatedAt: formatThaiDate(),
             }
           : item,
       ),
     );
+  };
+
+  const editCategory = (id: string) => {
+    const target = categories.find((item) => item.id === id);
+    if (!target) return;
+
+    setEditingId(id);
+    setName(target.name);
+    setKind(target.kind);
+    setIsActive(target.isActive);
+    setSelectedColors(target.kind === "ประตูม้วน" ? target.colors : []);
+    setCustomColor("");
+    setModalOpen(true);
+  };
+
+  const handleSubmit = () => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
+    if (kind === "ประตูม้วน" && selectedColors.length === 0) return;
+
+    if (editingId) {
+      setCategories((prev) =>
+        prev.map((item) =>
+          item.id === editingId
+            ? {
+                ...item,
+                name: trimmedName,
+                kind,
+                colors: kind === "ประตูม้วน" ? selectedColors : [],
+                isActive,
+                updatedAt: formatThaiDate(),
+              }
+            : item,
+        ),
+      );
+      closeModal();
+      return;
+    }
+
+    setCategories((prev) => [
+      {
+        id: `CAT-${String(prev.length + 1).padStart(3, "0")}`,
+        name: trimmedName,
+        kind,
+        colors: kind === "ประตูม้วน" ? selectedColors : [],
+        isActive,
+        updatedAt: formatThaiDate(),
+      },
+      ...prev,
+    ]);
+    closeModal();
   };
 
   return (
@@ -81,26 +159,40 @@ export default function ProductCategoriesPage() {
         </div>
       </section>
 
-      <section className="mt-4 grid gap-4 xl:grid-cols-[1.45fr_1fr]">
+      <section className="mt-4">
         <ProductCategoriesTable
           rows={filteredRows}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onToggleStatus={toggleCategoryStatus}
-        />
-        <ProductCategoryForm
-          name={name}
-          kind={kind}
-          selectedColors={selectedColors}
-          customColor={customColor}
-          defaultColors={defaultColors}
-          onNameChange={setName}
-          onKindChange={setKind}
-          onToggleColor={toggleColor}
-          onCustomColorChange={setCustomColor}
-          onAddCustomColor={addCustomColor}
+          onAddNew={openCreateModal}
+          onEdit={editCategory}
         />
       </section>
+
+      <ProductCategoryForm
+        open={modalOpen}
+        editing={Boolean(editingId)}
+        name={name}
+        kind={kind}
+        isActive={isActive}
+        selectedColors={selectedColors}
+        customColor={customColor}
+        defaultColors={defaultColors}
+        onClose={closeModal}
+        onNameChange={setName}
+        onKindChange={(nextKind) => {
+          setKind(nextKind);
+          if (nextKind === "อะไหล่") {
+            setSelectedColors([]);
+          }
+        }}
+        onStatusChange={setIsActive}
+        onToggleColor={toggleColor}
+        onCustomColorChange={setCustomColor}
+        onAddCustomColor={addCustomColor}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

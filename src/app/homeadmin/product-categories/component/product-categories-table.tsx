@@ -1,4 +1,6 @@
-﻿import { TagIcon } from "@heroicons/react/24/outline";
+﻿import { PencilSquareIcon, TagIcon } from "@heroicons/react/24/outline";
+import { FilterTabs } from "../../components/admin-shared/filter-tabs";
+import { ListHeaderActions } from "../../components/admin-shared/list-header-actions";
 import type { CategoryKind, ProductCategory } from "./types";
 
 type ProductCategoriesTableProps = {
@@ -6,6 +8,8 @@ type ProductCategoriesTableProps = {
   activeTab: "ทั้งหมด" | CategoryKind;
   onTabChange: (tab: "ทั้งหมด" | CategoryKind) => void;
   onToggleStatus: (id: string) => void;
+  onAddNew: () => void;
+  onEdit: (id: string) => void;
 };
 
 export function ProductCategoriesTable({
@@ -13,32 +17,23 @@ export function ProductCategoriesTable({
   activeTab,
   onTabChange,
   onToggleStatus,
+  onAddNew,
+  onEdit,
 }: ProductCategoriesTableProps) {
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <TagIcon className="h-5 w-5 text-slate-500" />
-          <h2 className="text-base font-semibold text-slate-900">รายการประเภทสินค้า</h2>
-        </div>
+      <ListHeaderActions
+        title="รายการประเภทสินค้า"
+        icon={TagIcon}
+        addLabel="เพิ่มประเภทสินค้า"
+        onAdd={onAddNew}
+      />
 
-        <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1 text-sm">
-          {(["ทั้งหมด", "ประตูม้วน", "อะไหล่"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => onTabChange(tab)}
-              className={`rounded-lg px-3 py-1.5 transition ${
-                activeTab === tab
-                  ? "bg-white font-semibold text-blue-900 shadow-sm"
-                  : "text-slate-600"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
+      <FilterTabs
+        options={["ทั้งหมด", "ประตูม้วน", "อะไหล่"] as const}
+        value={activeTab}
+        onChange={onTabChange}
+      />
 
       <div className="mt-4 overflow-x-auto">
         <table className="min-w-full text-left text-sm">
@@ -49,6 +44,7 @@ export function ProductCategoriesTable({
               <th className="px-3 py-2 font-medium">กลุ่ม</th>
               <th className="px-3 py-2 font-medium">สีที่รองรับ</th>
               <th className="px-3 py-2 font-medium">สถานะ</th>
+              <th className="px-3 py-2 font-medium">การจัดการ</th>
               <th className="px-3 py-2 font-medium">อัปเดตล่าสุด</th>
             </tr>
           </thead>
@@ -88,6 +84,16 @@ export function ProductCategoriesTable({
                       />
                     </span>
                     <span>{item.isActive ? "ใช้งานอยู่" : "ปิดใช้งาน"}</span>
+                  </button>
+                </td>
+                <td className="px-3 py-3">
+                  <button
+                    type="button"
+                    onClick={() => onEdit(item.id)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 transition hover:bg-slate-50"
+                  >
+                    <PencilSquareIcon className="h-4 w-4" />
+                    แก้ไข
                   </button>
                 </td>
                 <td className="px-3 py-3 text-slate-500">{item.updatedAt}</td>
