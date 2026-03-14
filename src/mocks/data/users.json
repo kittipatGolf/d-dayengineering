@@ -1,0 +1,98 @@
+[
+  {
+    "id": "USR-004",
+    "username": "Golf1234",
+    "firstName": "กฤติภัทร",
+    "lastName": "ไชยประดิษฐาน",
+    "email": "kittipat.chainpritan@gmail.com",
+    "phone": "0999513694",
+    "addresses": [
+      {
+        "id": "ADR-004-1",
+        "line": "111",
+        "province": "กรุงเทพมหานคร",
+        "district": "เขตพระนคร",
+        "subdistrict": "พระบรมมหาราชวัง",
+        "postalCode": "10200"
+      }
+    ],
+    "role": "User"
+  },
+  {
+    "id": "USR-005",
+    "username": "testadmin",
+    "firstName": "เทสแอดมิน",
+    "lastName": "เทสแอดมิน",
+    "email": "testadmin@gmail.com",
+    "phone": "0999999999",
+    "addresses": [
+      {
+        "id": "ADR-005-1",
+        "line": "45/12",
+        "province": "กรุงเทพมหานคร",
+        "district": "เขตบางกะปิ",
+        "subdistrict": "หัวหมาก",
+        "postalCode": "10240"
+      }
+    ],
+    "role": "Admin"
+  },
+  {
+    "id": "USR-006",
+    "username": "test",
+    "firstName": "เทส",
+    "lastName": "เทส",
+    "email": "testuser@gmail.com",
+    "phone": "0999999998",
+    "addresses": [
+      {
+        "id": "ADR-006-1",
+        "line": "99",
+        "province": "สงขลา",
+        "district": "หาดใหญ่",
+        "subdistrict": "หาดใหญ่",
+        "postalCode": "90110"
+      }
+    ],
+    "role": "User"
+  },
+  {
+    "id": "USR-009",
+    "username": "boom",
+    "firstName": "ศุภกร",
+    "lastName": "สุขแก้ว",
+    "email": "bbgb.2487@gmail.com",
+    "phone": "0622127544",
+    "addresses": [
+      {
+        "id": "ADR-009-1",
+        "line": "88/6",
+        "province": "นครปฐม",
+        "district": "เมืองนครปฐม",
+        "subdistrict": "สนามจันทร์",
+        "postalCode": "73000"
+      }
+    ],
+    "role": "User"
+  },
+  {
+    "id": "USR-010",
+    "username": "admin",
+    "firstName": "กฤติภัทร",
+    "lastName": "ไชยประดิษฐาน",
+    "email": "matergmgolf@gmail.com",
+    "phone": "0999513695",
+    "addresses": [
+      {
+        "id": "ADR-010-1",
+        "line": "12/4",
+        "province": "เชียงใหม่",
+        "district": "แม่ริม",
+        "subdistrict": "ริมใต้",
+        "postalCode": "50180"
+      }
+    ],
+    "role": "User"
+  }
+]
+

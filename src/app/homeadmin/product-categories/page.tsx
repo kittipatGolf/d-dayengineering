@@ -1,7 +1,8 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
-import { defaultColors, initialCategories } from "./component/mock-data";
+import { useEffect, useMemo, useState } from "react";
+import defaultColors from "@/mocks/data/default-colors.json";
+import { productCategoriesService } from "@/lib/services/product-categories.service";
 import { ProductCategoriesTable } from "./component/product-categories-table";
 import { ProductCategoryForm } from "./component/product-category-form";
 import type { CategoryKind, ProductCategory } from "./component/types";
@@ -15,7 +16,7 @@ function formatThaiDate(date = new Date()) {
 }
 
 export default function ProductCategoriesPage() {
-  const [categories, setCategories] = useState<ProductCategory[]>(initialCategories);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [activeTab, setActiveTab] = useState<"ทั้งหมด" | CategoryKind>("ทั้งหมด");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -25,6 +26,10 @@ export default function ProductCategoriesPage() {
   const [isActive, setIsActive] = useState(true);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [customColor, setCustomColor] = useState("");
+
+  useEffect(() => {
+    productCategoriesService.getAll().then(setCategories).catch(() => setCategories([]));
+  }, []);
 
   const filteredRows = useMemo(() => {
     if (activeTab === "ทั้งหมด") return categories;
@@ -70,18 +75,14 @@ export default function ProductCategoriesPage() {
     setCustomColor("");
   };
 
-  const toggleCategoryStatus = (id: string) => {
-    setCategories((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              isActive: !item.isActive,
-              updatedAt: formatThaiDate(),
-            }
-          : item,
-      ),
-    );
+  const toggleCategoryStatus = async (id: string) => {
+    const target = categories.find((item) => item.id === id);
+    if (!target) return;
+    const updated = await productCategoriesService.update(id, {
+      isActive: !target.isActive,
+      updatedAt: formatThaiDate(),
+    });
+    setCategories((prev) => prev.map((item) => (item.id === id ? updated : item)));
   };
 
   const editCategory = (id: string) => {
@@ -97,41 +98,31 @@ export default function ProductCategoriesPage() {
     setModalOpen(true);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) return;
     if (kind === "ประตูม้วน" && selectedColors.length === 0) return;
 
     if (editingId) {
-      setCategories((prev) =>
-        prev.map((item) =>
-          item.id === editingId
-            ? {
-                ...item,
-                name: trimmedName,
-                kind,
-                colors: kind === "ประตูม้วน" ? selectedColors : [],
-                isActive,
-                updatedAt: formatThaiDate(),
-              }
-            : item,
-        ),
-      );
-      closeModal();
-      return;
-    }
-
-    setCategories((prev) => [
-      {
-        id: `CAT-${String(prev.length + 1).padStart(3, "0")}`,
+      const updated = await productCategoriesService.update(editingId, {
         name: trimmedName,
         kind,
         colors: kind === "ประตูม้วน" ? selectedColors : [],
         isActive,
         updatedAt: formatThaiDate(),
-      },
-      ...prev,
-    ]);
+      });
+      setCategories((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
+      closeModal();
+      return;
+    }
+
+    const created = await productCategoriesService.create({
+      name: trimmedName,
+      kind,
+      colors: kind === "ประตูม้วน" ? selectedColors : [],
+      isActive,
+    });
+    setCategories((prev) => [created, ...prev]);
     closeModal();
   };
 

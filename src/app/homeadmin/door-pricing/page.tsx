@@ -1,9 +1,10 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
-import { initialCategories } from "../product-categories/component/mock-data";
+import { useEffect, useMemo, useState } from "react";
+import { doorPricingService } from "@/lib/services/door-pricing.service";
+import { productCategoriesService } from "@/lib/services/product-categories.service";
+import type { ProductCategory } from "../product-categories/component/types";
 import { DoorPricingFormModal } from "./component/door-pricing-form-modal";
-import { initialDoorPricingRows, emptyDoorPricingForm } from "./component/mock-data";
 import { DoorPricingTable } from "./component/door-pricing-table";
 import type { DoorPricingFormState, DoorPricingRow } from "./component/types";
 
@@ -15,20 +16,38 @@ function formatThaiDate(date = new Date()) {
   });
 }
 
-export default function DoorPricingPage() {
-  const doorCategories = useMemo(
-    () => initialCategories.filter((item) => item.kind === "ประตูม้วน" && item.isActive),
-    [],
-  );
+function emptyDoorPricingForm(categoryId: string): DoorPricingFormState {
+  return {
+    categoryId,
+    mode: "existing",
+    selectedThickness: "",
+    newThickness: "",
+    minArea: "1",
+    maxArea: "",
+    pricePerSqm: "",
+  };
+}
 
-  const [rows, setRows] = useState<DoorPricingRow[]>(initialDoorPricingRows);
+export default function DoorPricingPage() {
+  const [doorCategories, setDoorCategories] = useState<ProductCategory[]>([]);
+  const [rows, setRows] = useState<DoorPricingRow[]>([]);
   const [filterValue, setFilterValue] = useState("ทั้งหมด");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<DoorPricingFormState>(() => ({
-    ...emptyDoorPricingForm,
-    categoryId: doorCategories[0]?.id ?? "",
-  }));
+  const [form, setForm] = useState<DoorPricingFormState>(emptyDoorPricingForm(""));
+
+  useEffect(() => {
+    productCategoriesService
+      .getAll()
+      .then((all) => {
+        const doors = all.filter((item) => item.kind === "ประตูม้วน" && item.isActive);
+        setDoorCategories(doors);
+        setForm((prev) => ({ ...prev, categoryId: doors[0]?.id ?? "" }));
+      })
+      .catch(() => setDoorCategories([]));
+
+    doorPricingService.getAll().then(setRows).catch(() => setRows([]));
+  }, []);
 
   const filterOptions = useMemo(
     () => ["ทั้งหมด", ...doorCategories.map((item) => item.name)],
@@ -49,11 +68,7 @@ export default function DoorPricingPage() {
 
   const openCreate = () => {
     setEditingId(null);
-    setForm({
-      ...emptyDoorPricingForm,
-      categoryId: doorCategories[0]?.id ?? "",
-      mode: "existing",
-    });
+    setForm(emptyDoorPricingForm(doorCategories[0]?.id ?? ""));
     setOpen(true);
   };
 
@@ -79,11 +94,12 @@ export default function DoorPricingPage() {
     setEditingId(null);
   };
 
-  const onDelete = (id: string) => {
+  const onDelete = async (id: string) => {
+    await doorPricingService.remove(id);
     setRows((prev) => prev.filter((row) => row.id !== id));
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     const category = doorCategories.find((item) => item.id === form.categoryId);
     const thickness = form.mode === "new" ? form.newThickness.trim() : form.selectedThickness.trim();
     const minArea = Number(form.minArea);
@@ -94,7 +110,7 @@ export default function DoorPricingPage() {
     if (!Number.isFinite(minArea) || !Number.isFinite(maxArea) || minArea <= 0 || maxArea < minArea) return;
     if (!Number.isFinite(pricePerSqm) || pricePerSqm <= 0) return;
 
-    const nextRow = {
+    const payload = {
       categoryId: category.id,
       categoryName: category.name,
       thickness,
@@ -105,20 +121,14 @@ export default function DoorPricingPage() {
     };
 
     if (editingId) {
-      setRows((prev) =>
-        prev.map((row) => (row.id === editingId ? { ...row, ...nextRow } : row)),
-      );
+      const updated = await doorPricingService.update(editingId, payload);
+      setRows((prev) => prev.map((row) => (row.id === editingId ? updated : row)));
       closeModal();
       return;
     }
 
-    setRows((prev) => [
-      {
-        id: `DP-${String(prev.length + 1).padStart(3, "0")}`,
-        ...nextRow,
-      },
-      ...prev,
-    ]);
+    const created = await doorPricingService.create(payload);
+    setRows((prev) => [created, ...prev]);
     closeModal();
   };
 

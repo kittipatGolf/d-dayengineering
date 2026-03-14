@@ -70,14 +70,16 @@ export function ProductsTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((item) => (
+            {rows.map((item) => {
+              const isSelling = item.status === "วางขาย";
+              return (
               <tr key={item.id} className="border-b border-slate-100">
                 <td className="px-3 py-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
-                      {item.images[0] ? (
+                      {item.images[0]?.url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.images[0]} alt={item.name} className="h-11 w-11 rounded-lg object-cover" />
+                        <img src={item.images[0].url} alt={item.name} className="h-11 w-11 rounded-lg object-cover" />
                       ) : (
                         <PhotoIcon className="h-5 w-5" />
                       )}
@@ -114,14 +116,26 @@ export function ProductsTable({
                 <td className="px-3 py-3">
                   <button
                     type="button"
+                    aria-pressed={isSelling}
                     onClick={() => onToggleStatus(item.id)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
-                      item.status === "วางขาย"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-rose-100 text-rose-700"
+                    className={`inline-flex items-center gap-2 rounded-full border px-2 py-1 text-xs font-medium transition ${
+                      isSelling
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        : "border-slate-200 bg-slate-100 text-slate-600"
                     }`}
                   >
-                    {item.status}
+                    <span
+                      className={`relative h-4 w-8 rounded-full transition ${
+                        isSelling ? "bg-emerald-500" : "bg-slate-300"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 h-3 w-3 rounded-full bg-white shadow transition ${
+                          isSelling ? "left-4" : "left-0.5"
+                        }`}
+                      />
+                    </span>
+                    <span>{isSelling ? "วางขาย" : "ยกเลิกการขาย"}</span>
                   </button>
                 </td>
                 <td className="px-3 py-3">
@@ -135,7 +149,8 @@ export function ProductsTable({
                   </button>
                 </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
       </div>

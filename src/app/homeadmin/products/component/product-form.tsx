@@ -1,5 +1,4 @@
-﻿import { useRef } from "react";
-import { PlusIcon } from "@heroicons/react/24/outline";
+﻿import { MultiImageUploader } from "@/components/shared-image/multi-image-uploader";
 import { FormModal } from "../../components/admin-shared/form-modal";
 import type { CategoryKind, ProductCategory } from "../../product-categories/component/types";
 import type { ProductFormState } from "./types";
@@ -13,8 +12,6 @@ type ProductFormModalProps = {
   onClose: () => void;
   onProductTypeChange: (type: CategoryKind) => void;
   onCategoryChange: (categoryId: string) => void;
-  onPickImages: (files: FileList | null) => void;
-  onRemoveImage: (index: number) => void;
   onFormChange: (next: ProductFormState) => void;
   onSubmit: () => void;
 };
@@ -28,13 +25,9 @@ export function ProductFormModal({
   onClose,
   onProductTypeChange,
   onCategoryChange,
-  onPickImages,
-  onRemoveImage,
   onFormChange,
   onSubmit,
 }: ProductFormModalProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
   return (
     <FormModal
       open={open}
@@ -60,51 +53,10 @@ export function ProductFormModal({
       }
     >
       <div className="space-y-4 text-sm">
-        <div className="rounded-xl border border-slate-200">
-          <div className="border-b border-slate-200 p-3">
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                onPickImages(e.target.files);
-                e.currentTarget.value = "";
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
-            >
-              <PlusIcon className="h-4 w-4" />
-              เลือกรูปภาพ
-            </button>
-          </div>
-
-          <div className="p-3">
-            {form.images.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {form.images.map((img, index) => (
-                  <div key={`${img}-${index}`} className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img} alt={`preview-${index}`} className="h-16 w-16 rounded-lg object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => onRemoveImage(index)}
-                      className="absolute -right-1 -top-1 rounded-full bg-slate-900 p-0.5 text-white"
-                    >
-                      x
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-slate-400">ยังไม่ได้เลือกรูปภาพ</p>
-            )}
-          </div>
-        </div>
+        <MultiImageUploader
+          value={form.images}
+          onChange={(images) => onFormChange({ ...form, images })}
+        />
 
         <label className="block">
           <span className="mb-1 block text-slate-600">ชื่อสินค้า</span>

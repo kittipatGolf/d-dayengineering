@@ -1,9 +1,9 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
-import { initialCategories } from "../product-categories/component/mock-data";
-import type { CategoryKind } from "../product-categories/component/types";
-import { emptyProductForm, initialProducts } from "./component/mock-data";
+import { useEffect, useMemo, useState } from "react";
+import { productCategoriesService } from "@/lib/services/product-categories.service";
+import { productsService } from "@/lib/services/products.service";
+import type { CategoryKind, ProductCategory } from "../product-categories/component/types";
 import { ProductFormModal } from "./component/product-form";
 import { ProductStats } from "./component/product-stats";
 import { ProductsTable } from "./component/products-table";
@@ -21,24 +21,43 @@ function toCurrency(value: number) {
   return new Intl.NumberFormat("th-TH").format(value);
 }
 
-export default function ProductsPage() {
-  const allActiveCategories = useMemo(
-    () => initialCategories.filter((item) => item.isActive),
-    [],
-  );
+function emptyProductForm(type: CategoryKind, categoryId: string): ProductFormState {
+  return {
+    productType: type,
+    name: "",
+    categoryId,
+    price: "",
+    colors: [],
+    description: "",
+    warrantyYears: "",
+    isSelling: true,
+    images: [],
+  };
+}
 
-  const [products, setProducts] = useState<ProductItem[]>(initialProducts);
+export default function ProductsPage() {
+  const [allActiveCategories, setAllActiveCategories] = useState<ProductCategory[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>([]);
   const [activeTab, setActiveTab] = useState<ProductTab>("ทั้งหมด");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState<ProductFormState>(() => {
-    const firstDoorCategory = allActiveCategories.find((item) => item.kind === "ประตูม้วน");
-    return {
-      ...emptyProductForm,
-      productType: "ประตูม้วน",
-      categoryId: firstDoorCategory?.id ?? "",
-    };
-  });
+  const [form, setForm] = useState<ProductFormState>(() =>
+    emptyProductForm("ประตูม้วน", ""),
+  );
+
+  useEffect(() => {
+    productCategoriesService
+      .getAll()
+      .then((data) => {
+        const active = data.filter((item) => item.isActive);
+        setAllActiveCategories(active);
+        const firstDoorCategory = active.find((item) => item.kind === "ประตูม้วน");
+        setForm((prev) => ({ ...prev, categoryId: firstDoorCategory?.id ?? "" }));
+      })
+      .catch(() => setAllActiveCategories([]));
+
+    productsService.getAll().then(setProducts).catch(() => setProducts([]));
+  }, []);
 
   const categoryOptions = useMemo(
     () => allActiveCategories.filter((item) => item.kind === form.productType),
@@ -65,11 +84,7 @@ export default function ProductsPage() {
   const resetForm = (type: CategoryKind = "ประตูม้วน") => {
     const firstCategory = allActiveCategories.find((item) => item.kind === type);
     setEditingId(null);
-    setForm({
-      ...emptyProductForm,
-      productType: type,
-      categoryId: firstCategory?.id ?? "",
-    });
+    setForm(emptyProductForm(type, firstCategory?.id ?? ""));
   };
 
   const openCreateModal = () => {
@@ -80,19 +95,6 @@ export default function ProductsPage() {
   const closeModal = () => {
     setModalOpen(false);
     setEditingId(null);
-  };
-
-  const handlePickImages = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    const nextUrls = Array.from(files).map((file) => URL.createObjectURL(file));
-    setForm((prev) => ({ ...prev, images: [...prev.images, ...nextUrls] }));
-  };
-
-  const handleRemoveImage = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
   };
 
   const handleProductTypeChange = (nextType: CategoryKind) => {
@@ -118,18 +120,14 @@ export default function ProductsPage() {
     }));
   };
 
-  const toggleProductStatus = (id: string) => {
-    setProducts((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: item.status === "วางขาย" ? "ยกเลิกการขาย" : "วางขาย",
-              updatedAt: formatThaiDate(),
-            }
-          : item,
-      ),
-    );
+  const toggleProductStatus = async (id: string) => {
+    const target = products.find((item) => item.id === id);
+    if (!target) return;
+    const updated = await productsService.update(id, {
+      status: target.status === "วางขาย" ? "ยกเลิกการขาย" : "วางขาย",
+      updatedAt: formatThaiDate(),
+    });
+    setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
   };
 
   const editProduct = (id: string) => {
@@ -151,7 +149,7 @@ export default function ProductsPage() {
     setModalOpen(true);
   };
 
-  const submitForm = () => {
+  const submitForm = async () => {
     const name = form.name.trim();
     const category = allActiveCategories.find((item) => item.id === form.categoryId);
     const isDoor = form.productType === "ประตูม้วน";
@@ -161,7 +159,7 @@ export default function ProductsPage() {
     if (isDoor && form.colors.length === 0) return;
     if (!isDoor && (!Number.isFinite(price) || price <= 0)) return;
 
-    const nextItem = {
+    const payload = {
       name,
       kind: form.productType,
       categoryId: category.id,
@@ -176,20 +174,14 @@ export default function ProductsPage() {
     } as const;
 
     if (editingId) {
-      setProducts((prev) =>
-        prev.map((item) => (item.id === editingId ? { ...item, ...nextItem } : item)),
-      );
+      const updated = await productsService.update(editingId, payload);
+      setProducts((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
       closeModal();
       return;
     }
 
-    setProducts((prev) => [
-      {
-        id: `PD-${String(prev.length + 1).padStart(3, "0")}`,
-        ...nextItem,
-      },
-      ...prev,
-    ]);
+    const created = await productsService.create(payload);
+    setProducts((prev) => [created, ...prev]);
     closeModal();
   };
 
@@ -225,8 +217,6 @@ export default function ProductsPage() {
         onClose={closeModal}
         onProductTypeChange={handleProductTypeChange}
         onCategoryChange={handleCategoryChange}
-        onPickImages={handlePickImages}
-        onRemoveImage={handleRemoveImage}
         onFormChange={setForm}
         onSubmit={submitForm}
       />

@@ -1,4 +1,5 @@
-﻿import type { CategoryKind } from "../../product-categories/component/types";
+﻿import type { UploadedImage } from "@/lib/upload/upload.types";
+import type { CategoryKind } from "../../product-categories/component/types";
 
 export type ProductStatus = "วางขาย" | "ยกเลิกการขาย";
 export type ProductTab = "ทั้งหมด" | "ประตูม้วน" | "อะไหล่ประตูม้วน";
@@ -13,7 +14,7 @@ export type ProductItem = {
   colors: string[];
   description: string;
   warrantyYears: string;
-  images: string[];
+  images: UploadedImage[];
   status: ProductStatus;
   updatedAt: string;
 };
@@ -27,5 +28,5 @@ export type ProductFormState = {
   description: string;
   warrantyYears: string;
   isSelling: boolean;
-  images: string[];
+  images: UploadedImage[];
 };

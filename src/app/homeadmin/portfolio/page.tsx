@@ -1,18 +1,23 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
-import { emptyPortfolioForm, initialPortfolioItems } from "./component/mock-data";
+import { useEffect, useMemo, useState } from "react";
+import { portfolioService } from "@/lib/services/portfolio.service";
+import { emptyPortfolioForm } from "./component/form-defaults";
 import { PortfolioCard } from "./component/portfolio-card";
 import { PortfolioFormModal } from "./component/portfolio-form-modal";
 import { PortfolioToolbar } from "./component/portfolio-toolbar";
 import type { PortfolioFormState, PortfolioItem } from "./component/types";
 
 export default function PortfolioPage() {
-  const [items, setItems] = useState<PortfolioItem[]>(initialPortfolioItems);
+  const [items, setItems] = useState<PortfolioItem[]>([]);
   const [query, setQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<PortfolioFormState>(emptyPortfolioForm);
+
+  useEffect(() => {
+    portfolioService.getAll().then(setItems).catch(() => setItems([]));
+  }, []);
 
   const filteredItems = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -38,7 +43,17 @@ export default function PortfolioPage() {
     setForm({
       title: target.title,
       description: target.description,
-      images: target.image ? [target.image] : [],
+      images: target.image
+        ? [
+            {
+              id: `${target.id}-cover`,
+              url: target.image,
+              name: "cover",
+              size: 0,
+              mimeType: "image/*",
+            },
+          ]
+        : [],
     });
     setModalOpen(true);
   };
@@ -48,64 +63,27 @@ export default function PortfolioPage() {
     setEditingId(null);
   };
 
-  const handlePickImages = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    const urls = Array.from(files).map((file) => URL.createObjectURL(file));
-    setForm((prev) => ({ ...prev, images: [...prev.images, ...urls] }));
-  };
-
-  const handleRemoveImage = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await portfolioService.remove(id);
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const title = form.title.trim();
     const description = form.description.trim();
-    const image = form.images[0] ?? "";
+    const image = form.images[0]?.url ?? "";
 
     if (!title || !description || !image) return;
 
-    const updatedAt = new Date().toLocaleDateString("th-TH", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-
     if (editingId) {
-      setItems((prev) =>
-        prev.map((item) =>
-          item.id === editingId
-            ? {
-                ...item,
-                title,
-                description,
-                image,
-                updatedAt,
-              }
-            : item,
-        ),
-      );
+      const updated = await portfolioService.update(editingId, { title, description, image });
+      setItems((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
       closeModal();
       return;
     }
 
-    setItems((prev) => [
-      {
-        id: `PF-${String(prev.length + 1).padStart(3, "0")}`,
-        title,
-        description,
-        image,
-        updatedAt,
-      },
-      ...prev,
-    ]);
+    const created = await portfolioService.create({ title, description, image });
+    setItems((prev) => [created, ...prev]);
     closeModal();
   };
 
@@ -118,7 +96,7 @@ export default function PortfolioPage() {
 
       <PortfolioToolbar query={query} onQueryChange={setQuery} onAdd={openCreate} />
 
-      <section className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredItems.map((item) => (
           <PortfolioCard
             key={item.id}
@@ -139,8 +117,6 @@ export default function PortfolioPage() {
         form={form}
         onClose={closeModal}
         onFormChange={setForm}
-        onPickImages={handlePickImages}
-        onRemoveImage={handleRemoveImage}
         onSubmit={handleSubmit}
       />
     </div>

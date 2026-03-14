@@ -1,0 +1,44 @@
+[
+  {
+    "id": "RH-001",
+    "username": "golf1234",
+    "images": [
+      "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=300&q=80",
+      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=300&q=80"
+    ],
+    "repairType": "ซ่อมมอเตอร์",
+    "repairItem": "ประตูม้วนไฟฟ้า",
+    "detail": "มอเตอร์ไม่ทำงานหลังไฟตก",
+    "repairDate": "12 มี.ค. 2026",
+    "address": {
+      "line": "132/40",
+      "subdistrict": "บางนา",
+      "district": "เขตบางนา",
+      "province": "กรุงเทพมหานคร",
+      "postalCode": "10260"
+    },
+    "status": "สำเร็จ",
+    "price": 2500
+  },
+  {
+    "id": "RH-002",
+    "username": "testuser",
+    "images": [
+      "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=300&q=80"
+    ],
+    "repairType": "เปลี่ยนใบประตู",
+    "repairItem": "ประตูม้วนทึบ",
+    "detail": "ใบประตูบิดงอจากแรงกระแทก",
+    "repairDate": "10 มี.ค. 2026",
+    "address": {
+      "line": "99",
+      "subdistrict": "หาดใหญ่",
+      "district": "หาดใหญ่",
+      "province": "สงขลา",
+      "postalCode": "90110"
+    },
+    "status": "ยกเลิก",
+    "price": 0
+  }
+]
+
