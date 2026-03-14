@@ -1,0 +1,23 @@
+[
+  {
+    "id": "PF-001",
+    "title": "ประตูม้วนแบบไฟฟ้า",
+    "description": "ผลงานการประกอบประตูไฟฟ้าของโรงงาน",
+    "image": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=800&q=80",
+    "updatedAt": "14 มี.ค. 2026"
+  },
+  {
+    "id": "PF-002",
+    "title": "ประตูม้วนแบบรอกโซ่",
+    "description": "ผลงานประกอบประตูม้วนแบบรอกโซ่",
+    "image": "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=800&q=80",
+    "updatedAt": "12 มี.ค. 2026"
+  },
+  {
+    "id": "PF-003",
+    "title": "ประตูม้วนหน้าร้าน",
+    "description": "ติดตั้งหน้าร้านพร้อมระบบล็อกเสริม",
+    "image": "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80",
+    "updatedAt": "10 มี.ค. 2026"
+  }
+]

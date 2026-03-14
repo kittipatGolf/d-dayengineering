@@ -1,0 +1,200 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { usersService } from "@/lib/services/users.service";
+import { UserAddressEditModal } from "./component/user-address-edit-modal";
+import { UserAddressesModal } from "./component/user-addresses-modal";
+import { UserEditModal } from "./component/user-edit-modal";
+import { UsersTable } from "./component/users-table";
+import type { AdminUser, UserAddress, UserRole } from "./component/types";
+
+type UserEditState = {
+  username: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  role: UserRole;
+};
+
+const EMPTY_EDIT_STATE: UserEditState = {
+  username: "",
+  firstName: "",
+  lastName: "",
+  phone: "",
+  email: "",
+  role: "User",
+};
+
+type AddressEditState = {
+  line: string;
+  province: string;
+  district: string;
+  subdistrict: string;
+  postalCode: string;
+};
+
+const EMPTY_ADDRESS_EDIT_STATE: AddressEditState = {
+  line: "",
+  province: "",
+  district: "",
+  subdistrict: "",
+  postalCode: "",
+};
+
+export default function UsersPage() {
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [keyword, setKeyword] = useState("");
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [selectedUserForAddress, setSelectedUserForAddress] = useState<AdminUser | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<UserEditState>(EMPTY_EDIT_STATE);
+  const [addressEditModalOpen, setAddressEditModalOpen] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [addressForm, setAddressForm] = useState<AddressEditState>(EMPTY_ADDRESS_EDIT_STATE);
+
+  useEffect(() => {
+    usersService.getAll().then(setUsers).catch(() => setUsers([]));
+  }, []);
+
+  const filteredUsers = useMemo(() => {
+    const q = keyword.trim().toLowerCase();
+    if (!q) return users;
+
+    return users.filter((user) =>
+      [
+        user.id,
+        user.username,
+        user.firstName,
+        user.lastName,
+        user.email,
+        user.phone,
+        ...user.addresses.map(
+          (address) =>
+            `${address.line} ${address.subdistrict} ${address.district} ${address.province} ${address.postalCode}`,
+        ),
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [users, keyword]);
+
+  const openAddressModal = (user: AdminUser) => {
+    setSelectedUserForAddress(user);
+    setAddressModalOpen(true);
+  };
+
+  const closeAddressModal = () => {
+    closeAddressEditModal();
+    setAddressModalOpen(false);
+    setSelectedUserForAddress(null);
+  };
+
+  const openEditModal = (user: AdminUser) => {
+    setEditingUserId(user.id);
+    setEditForm({
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      email: user.email,
+      role: user.role,
+    });
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setEditingUserId(null);
+    setEditForm(EMPTY_EDIT_STATE);
+  };
+
+  const saveEdit = async () => {
+    if (!editingUserId) return;
+    const updated = await usersService.update(editingUserId, editForm);
+    setUsers((prev) => prev.map((item) => (item.id === editingUserId ? updated : item)));
+    closeEditModal();
+  };
+
+  const deleteUser = async (id: string) => {
+    await usersService.remove(id);
+    setUsers((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const openAddressEditModal = (address: UserAddress) => {
+    setEditingAddressId(address.id);
+    setAddressForm({
+      line: address.line,
+      province: address.province,
+      district: address.district,
+      subdistrict: address.subdistrict,
+      postalCode: address.postalCode,
+    });
+    setAddressEditModalOpen(true);
+  };
+
+  const closeAddressEditModal = () => {
+    setAddressEditModalOpen(false);
+    setEditingAddressId(null);
+    setAddressForm(EMPTY_ADDRESS_EDIT_STATE);
+  };
+
+  const saveAddressEdit = async () => {
+    if (!selectedUserForAddress || !editingAddressId) return;
+
+    const nextAddresses = selectedUserForAddress.addresses.map((address) =>
+      address.id === editingAddressId ? { ...address, ...addressForm } : address,
+    );
+
+    const updatedUser = await usersService.updateAddresses(selectedUserForAddress.id, nextAddresses);
+
+    setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
+    setSelectedUserForAddress(updatedUser);
+    closeAddressEditModal();
+  };
+
+  const deleteAddress = async (addressId: string) => {
+    if (!selectedUserForAddress) return;
+    const nextAddresses = selectedUserForAddress.addresses.filter((address) => address.id !== addressId);
+    const updatedUser = await usersService.updateAddresses(selectedUserForAddress.id, nextAddresses);
+    setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
+    setSelectedUserForAddress(updatedUser);
+  };
+
+  return (
+    <div className="rounded-3xl border border-slate-300 bg-slate-100 p-3 shadow-sm md:p-4">
+      <UsersTable
+        rows={filteredUsers}
+        keyword={keyword}
+        onKeywordChange={setKeyword}
+        onViewAddresses={openAddressModal}
+        onEdit={openEditModal}
+        onDelete={deleteUser}
+      />
+
+      <UserAddressesModal
+        open={addressModalOpen}
+        user={selectedUserForAddress}
+        onClose={closeAddressModal}
+        onEditAddress={openAddressEditModal}
+        onDeleteAddress={deleteAddress}
+      />
+      <UserAddressEditModal
+        open={addressEditModalOpen}
+        form={addressForm}
+        onClose={closeAddressEditModal}
+        onFormChange={setAddressForm}
+        onSubmit={saveAddressEdit}
+      />
+      <UserEditModal
+        open={editModalOpen}
+        form={editForm}
+        onClose={closeEditModal}
+        onFormChange={setEditForm}
+        onSubmit={saveEdit}
+      />
+    </div>
+  );
+}
