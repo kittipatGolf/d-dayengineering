@@ -1,4 +1,5 @@
 import { EyeIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { SearchableSelect } from "@/components/searchable-select";
 import type { OrderRecord, OrderStatus } from "./types";
 
 type OrdersTableProps = {
@@ -8,6 +9,13 @@ type OrdersTableProps = {
   onOpenSummary: (order: OrderRecord) => void;
   onChangeStatus: (id: string, status: OrderStatus) => void;
 };
+
+const statusOptions = [
+  { value: "รอการยืนยัน", label: "รอการยืนยัน" },
+  { value: "ได้รับการยืนยัน", label: "ได้รับการยืนยัน" },
+  { value: "สำเร็จ", label: "สำเร็จ" },
+  { value: "ยกเลิก", label: "ยกเลิก" },
+];
 
 function statusClassName(status: OrderStatus) {
   if (status === "สำเร็จ") return "bg-emerald-100 text-emerald-800";
@@ -70,16 +78,14 @@ export function OrdersTable({ rows, onOpenAddress, onOpenItems, onOpenSummary, o
                 </span>
               </td>
               <td className="px-3 py-4">
-                <select
+                <SearchableSelect
+                  options={statusOptions}
                   value={row.status}
-                  onChange={(event) => onChangeStatus(row.id, event.target.value as OrderStatus)}
-                  className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700"
-                >
-                  <option value="รอการยืนยัน">รอการยืนยัน</option>
-                  <option value="ได้รับการยืนยัน">ได้รับการยืนยัน</option>
-                  <option value="สำเร็จ">สำเร็จ</option>
-                  <option value="ยกเลิก">ยกเลิก</option>
-                </select>
+                  onChange={(v) => onChangeStatus(row.id, v as OrderStatus)}
+                  searchable={false}
+                  size="sm"
+                  className="min-w-36"
+                />
               </td>
               <td className="px-3 py-4">
                 <button

@@ -1,28 +1,72 @@
-﻿import type { ReactNode } from "react";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 
 type ProfileDataTableProps = {
   columns: string[];
+  rows?: string[][];
   emptyText: string;
   topAction?: ReactNode;
   pagination?: boolean;
+  sectionType?: "orders" | "address" | "repair";
+  onDeleteAddress?: (id: string) => void;
+  onRowClick?: (rowIndex: number) => void;
 };
 
-export function ProfileDataTable({ columns, emptyText, topAction, pagination = true }: ProfileDataTableProps) {
+export function ProfileDataTable({
+  columns,
+  rows = [],
+  emptyText,
+  topAction,
+  pagination = true,
+  sectionType,
+  onDeleteAddress,
+  onRowClick,
+}: ProfileDataTableProps) {
+  const hasRows = rows.length > 0;
+
   return (
     <div className="mt-4">
       {topAction ? <div className="mb-4">{topAction}</div> : null}
 
-      <div className="rounded-lg border border-slate-200 md:hidden">
-        <div className="grid grid-cols-2 bg-slate-100 text-slate-700">
-          {(columns.length > 2 ? columns.slice(0, 2) : columns).map((column) => (
-            <div key={column} className="px-4 py-3 font-semibold">
-              {column}
+      {/* Mobile card layout */}
+      <div className="space-y-3 md:hidden">
+        {hasRows ? (
+          rows.map((row, rowIndex) => (
+            <div key={rowIndex} className={`rounded-lg border border-slate-200 p-4${onRowClick ? " cursor-pointer hover:bg-slate-50" : ""}`} onClick={() => onRowClick?.(rowIndex)}>
+              {columns.map((col, colIndex) => {
+                // For address section, last column is the delete action
+                if (sectionType === "address" && colIndex === columns.length - 1) {
+                  return (
+                    <div key={col} className="mt-2 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => onDeleteAddress?.(row[colIndex])}
+                        className="inline-flex items-center gap-1 rounded bg-red-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-400"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                        ลบ
+                      </button>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={col} className="flex items-start gap-2 py-1">
+                    <span className="shrink-0 font-semibold text-slate-700">{col}:</span>
+                    <span className="text-slate-600">{row[colIndex] ?? "-"}</span>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
-        <div className="border-t border-slate-200 px-4 py-5 text-slate-600">{emptyText}</div>
+          ))
+        ) : (
+          <div className="rounded-lg border border-slate-200 px-4 py-5 text-slate-600">
+            {emptyText}
+          </div>
+        )}
       </div>
 
+      {/* Desktop table layout */}
       <div className="hidden overflow-x-auto rounded-lg border border-slate-200 md:block">
         <table className="w-full min-w-[640px] border-collapse text-left lg:min-w-[980px]">
           <thead>
@@ -35,11 +79,41 @@ export function ProfileDataTable({ columns, emptyText, topAction, pagination = t
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-slate-200">
-              <td colSpan={columns.length} className="px-4 py-5 text-slate-600">
-                {emptyText}
-              </td>
-            </tr>
+            {hasRows ? (
+              rows.map((row, rowIndex) => (
+                <tr key={rowIndex} className={`border-b border-slate-200 hover:bg-slate-50${onRowClick ? " cursor-pointer" : ""}`} onClick={() => onRowClick?.(rowIndex)}>
+                  {row.map((cell, colIndex) => {
+                    // For address section, last column is the delete action
+                    if (sectionType === "address" && colIndex === columns.length - 1) {
+                      return (
+                        <td key={colIndex} className="px-4 py-3">
+                          <button
+                            type="button"
+                            onClick={() => onDeleteAddress?.(cell)}
+                            className="inline-flex items-center gap-1 rounded bg-red-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-400"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                            ลบ
+                          </button>
+                        </td>
+                      );
+                    }
+
+                    return (
+                      <td key={colIndex} className="px-4 py-3 text-slate-600">
+                        {cell}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))
+            ) : (
+              <tr className="border-b border-slate-200">
+                <td colSpan={columns.length} className="px-4 py-5 text-slate-600">
+                  {emptyText}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

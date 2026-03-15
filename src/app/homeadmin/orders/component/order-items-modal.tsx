@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormModal } from "../../components/admin-shared/form-modal";
 import { FilterTabs } from "../../components/admin-shared/filter-tabs";
 import type { OrderItem } from "./types";
@@ -17,6 +17,12 @@ type ItemsTab = "รายละเอียดสินค้า" | "แก้�
 export function OrderItemsModal({ open, items, getColorOptions, onClose, onSave }: OrderItemsModalProps) {
   const [tab, setTab] = useState<ItemsTab>("รายละเอียดสินค้า");
   const [editingItems, setEditingItems] = useState<OrderItem[]>(items);
+
+  // Sync editingItems when modal opens with new items
+  useEffect(() => {
+    setEditingItems(items);
+    setTab("รายละเอียดสินค้า");
+  }, [items]);
 
   return (
     <FormModal

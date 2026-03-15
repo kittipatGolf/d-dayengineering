@@ -11,9 +11,9 @@ export function PortfolioCard({ item, onEdit, onDelete }: PortfolioCardProps) {
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="relative aspect-[4/3] w-full bg-slate-100">
-        {item.image ? (
+        {item.images?.[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
+          <img src={item.images[0]} alt={item.title} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-slate-400">
             <MagnifyingGlassIcon className="h-7 w-7" />

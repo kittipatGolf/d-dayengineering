@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ReportFilterControls } from "../report-filter-controls";
 import { getRecentYears } from "../year-options";
 
@@ -10,18 +10,8 @@ const periods = [
 ] as const;
 
 const months = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ] as const;
 
 type PeriodValue = (typeof periods)[number]["value"];
@@ -32,34 +22,46 @@ type ChartItem = {
   active?: boolean;
 };
 
-function getYearlyRepairCosts(years: number[]): ChartItem[] {
-  return [...years].reverse().map((year, index) => ({
-    label: String(year),
-    value: 25000 + (index + 1) * 8000,
-  }));
-}
-
-function getMonthlyRepairCosts(selectedYear: number, selectedMonth: number): ChartItem[] {
-  return months.map((month, index) => ({
-    label: month,
-    value: 1200 + (selectedYear % 5) * 350 + index * 240,
-    active: index === selectedMonth,
-  }));
-}
-
 export function RepairOverviewPanel() {
   const years = useMemo(() => getRecentYears(5), []);
   const [period, setPeriod] = useState<PeriodValue>("month");
   const [year, setYear] = useState<number>(years[0]);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
+  const [chartData, setChartData] = useState<ChartItem[]>([]);
 
-  const chartData = useMemo(() => {
-    if (period === "year") {
-      return getYearlyRepairCosts(years);
+  const fetchData = useCallback(async () => {
+    try {
+      const params = new URLSearchParams({ type: "repairs", period });
+      if (period === "month") params.set("year", String(year));
+
+      const res = await fetch(`/api/dashboard?${params}`);
+      if (!res.ok) return;
+      const rows: { year?: number; month?: number; total: number }[] = await res.json();
+
+      if (period === "year") {
+        const yearMap = new Map(rows.map((r) => [r.year!, r.total]));
+        setChartData(
+          [...years].reverse().map((y) => ({
+            label: String(y),
+            value: yearMap.get(y) ?? 0,
+          })),
+        );
+      } else {
+        const monthMap = new Map(rows.map((r) => [r.month!, r.total]));
+        setChartData(
+          months.map((m, i) => ({
+            label: m,
+            value: monthMap.get(i + 1) ?? 0,
+            active: i === selectedMonth,
+          })),
+        );
+      }
+    } catch {
+      /* ignore */
     }
-
-    return getMonthlyRepairCosts(year, selectedMonth);
   }, [period, year, years, selectedMonth]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const highestValue = Math.max(...chartData.map((item) => item.value), 1);
   const totalRepairCost = chartData.reduce((sum, item) => sum + item.value, 0);

@@ -1,8 +1,9 @@
-﻿import {
+import {
   CheckCircleIcon,
   PaintBrushIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
+import { SearchableSelect } from "@/components/searchable-select";
 import { FormModal } from "../../components/admin-shared/form-modal";
 import type { CategoryKind } from "./types";
 
@@ -75,21 +76,23 @@ export function ProductCategoryForm({
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="เช่น ประตูม้วนอลูซิงค์"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
           />
         </label>
 
-        <label className="block">
+        <div>
           <span className="mb-1 block text-slate-600">กลุ่มสินค้า</span>
-          <select
+          <SearchableSelect
+            options={[
+              { value: "ประตูม้วน", label: "ประตูม้วน" },
+              { value: "อะไหล่", label: "อะไหล่" },
+            ]}
             value={kind}
-            onChange={(e) => onKindChange(e.target.value as CategoryKind)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
-          >
-            <option value="ประตูม้วน">ประตูม้วน</option>
-            <option value="อะไหล่">อะไหล่</option>
-          </select>
-        </label>
+            onChange={(v) => onKindChange(v as CategoryKind)}
+            searchable={false}
+            size="sm"
+          />
+        </div>
 
         {kind === "ประตูม้วน" && (
           <div className="rounded-xl border border-slate-200 p-3">
@@ -123,12 +126,12 @@ export function ProductCategoryForm({
                 value={customColor}
                 onChange={(e) => onCustomColorChange(e.target.value)}
                 placeholder="เพิ่มสีเอง"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none ring-blue-200 transition focus:ring"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
               />
               <button
                 type="button"
                 onClick={onAddCustomColor}
-                className="rounded-lg bg-slate-800 px-3 py-2 text-xs text-white transition hover:bg-slate-700"
+                className="rounded-xl bg-slate-800 px-3 py-2 text-xs text-white transition hover:bg-slate-700"
               >
                 <PlusIcon className="h-3.5 w-3.5" />
               </button>

@@ -1,4 +1,5 @@
 import { FormModal } from "../../components/admin-shared/form-modal";
+import { ThaiAddressInput, type ThaiAddressValue } from "@/components/thai-address-input";
 
 export type AddressEditState = {
   line: string;
@@ -16,15 +17,6 @@ type UserAddressEditModalProps = {
   onSubmit: () => void;
 };
 
-const PROVINCE_OPTIONS = ["กรุงเทพมหานคร", "เชียงใหม่", "สงขลา", "นครปฐม"] as const;
-const DISTRICT_OPTIONS = ["เขตพระนคร", "หาดใหญ่", "แม่ริม", "เมืองนครปฐม"] as const;
-const SUBDISTRICT_OPTIONS = ["พระบรมมหาราชวัง", "หาดใหญ่", "ริมใต้", "สนามจันทร์"] as const;
-
-function selectValueWithFallback(current: string, options: readonly string[]) {
-  if (!current) return "";
-  return options.includes(current) ? current : "";
-}
-
 export function UserAddressEditModal({
   open,
   form,
@@ -32,6 +24,13 @@ export function UserAddressEditModal({
   onFormChange,
   onSubmit,
 }: UserAddressEditModalProps) {
+  const addrValue: ThaiAddressValue = {
+    province: form.province,
+    district: form.district,
+    subdistrict: form.subdistrict,
+    postalCode: form.postalCode,
+  };
+
   return (
     <FormModal
       open={open}
@@ -58,64 +57,13 @@ export function UserAddressEditModal({
           />
         </label>
 
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">จังหวัด</span>
-          <select
-            value={selectValueWithFallback(form.province, PROVINCE_OPTIONS)}
-            onChange={(event) => onFormChange({ ...form, province: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
-          >
-            <option value="">เลือกจังหวัด</option>
-            {PROVINCE_OPTIONS.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">เขต/อำเภอ</span>
-          <select
-            value={selectValueWithFallback(form.district, DISTRICT_OPTIONS)}
-            onChange={(event) => onFormChange({ ...form, district: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
-          >
-            <option value="">เลือกเขต</option>
-            {DISTRICT_OPTIONS.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">ตำบล</span>
-          <select
-            value={selectValueWithFallback(form.subdistrict, SUBDISTRICT_OPTIONS)}
-            onChange={(event) => onFormChange({ ...form, subdistrict: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
-          >
-            <option value="">เลือกตำบล</option>
-            {SUBDISTRICT_OPTIONS.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">รหัสไปรษณีย์</span>
-          <input
-            value={form.postalCode}
-            onChange={(event) => onFormChange({ ...form, postalCode: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
-          />
-        </label>
+        <ThaiAddressInput
+          value={addrValue}
+          onChange={(v) => onFormChange({ ...form, ...v })}
+          inputClassName="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+          labelClassName="mb-1 block text-sm font-medium text-slate-700"
+        />
       </div>
     </FormModal>
   );
 }
-

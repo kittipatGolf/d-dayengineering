@@ -8,6 +8,7 @@ import { repairRequestsService } from "@/lib/services/repair-requests.service";
 import { RepairPriceModal } from "./component/repair-price-modal";
 import { RepairRequestsTable } from "./component/repair-requests-table";
 import type { HistoryAddress } from "../history/component/types";
+import { SuccessToast } from "@/components/success-toast";
 import type { RepairRequestItem, RepairRequestStatus } from "./component/types";
 
 type ActiveTab = "ทั้งหมด" | "รอการยืนยัน" | "ได้รับการยืนยัน";
@@ -27,12 +28,21 @@ export default function RepairRequestsPage() {
   const [priceModalMode, setPriceModalMode] = useState<"initial" | "complete">("complete");
   const [pendingCompleteId, setPendingCompleteId] = useState<string | null>(null);
   const [repairPriceInput, setRepairPriceInput] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
+  const [parts, setParts] = useState<{ id: string; name: string; price: number | null }[]>([]);
 
   useEffect(() => {
     repairRequestsService
       .getAll()
       .then((items) => setRows(items.filter((item) => isActiveStatus(item.status))))
       .catch(() => setRows([]));
+
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((products: { id: string; name: string; kind: string; price: number | null }[]) =>
+        setParts(products.filter((p) => p.kind === "อะไหล่").map((p) => ({ id: p.id, name: p.name, price: p.price }))),
+      )
+      .catch(() => {});
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -70,6 +80,7 @@ export default function RepairRequestsPage() {
       return;
     }
     setRows((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    setToast("เปลี่ยนสถานะสำเร็จ");
   };
 
   const confirmCompleteWithPrice = async () => {
@@ -86,6 +97,17 @@ export default function RepairRequestsPage() {
     setPriceModalOpen(false);
     setPendingCompleteId(null);
     setRepairPriceInput("");
+    setToast("ปิดงานซ่อมสำเร็จ");
+  };
+
+  const onSelectPart = async (id: string, partName: string) => {
+    try {
+      const updated = await repairRequestsService.updateFields(id, { selectedPart: partName });
+      setRows((prev) => prev.map((item) => (item.id === id ? { ...item, ...updated } : item)));
+      setToast("เลือกอะไหล่สำเร็จ");
+    } catch {
+      // ignore
+    }
   };
 
   const openInitialPriceModal = () => {
@@ -101,18 +123,22 @@ export default function RepairRequestsPage() {
     setRows(updatedRows.filter((item) => isActiveStatus(item.status)));
     setPriceModalOpen(false);
     setRepairPriceInput("");
+    setToast("อัปเดตราคาซ่อมเริ่มต้นสำเร็จ");
   };
 
   return (
-    <div className="rounded-3xl border border-slate-300 bg-slate-100 p-3 shadow-sm md:p-4">
-      <header className="rounded-2xl bg-linear-to-r from-blue-900 to-blue-700 px-5 py-5 text-white shadow-sm">
-        <h1 className="text-2xl font-bold">การจัดการคำขอแจ้งซ่อม</h1>
-        <p className="mt-1 text-sm text-blue-100">
-          ติดตามคำขอแจ้งซ่อม ปรับสถานะงาน และยืนยันราคาซ่อมก่อนปิดงาน
-        </p>
+    <div className="space-y-5">
+      <header className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-6 py-6 text-white shadow-lg">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold">การจัดการคำขอแจ้งซ่อม</h1>
+          <p className="mt-1 text-sm text-blue-200/80">
+            ติดตามคำขอแจ้งซ่อม ปรับสถานะงาน และยืนยันราคาซ่อมก่อนปิดงาน
+          </p>
+        </div>
       </header>
 
-      <section className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <FilterTabs
             options={["ทั้งหมด", "รอการยืนยัน", "ได้รับการยืนยัน"] as const}
@@ -139,7 +165,7 @@ export default function RepairRequestsPage() {
           </button>
         </div>
 
-        <RepairRequestsTable rows={filteredRows} onOpenAddress={openAddress} onChangeStatus={onChangeStatus} />
+        <RepairRequestsTable rows={filteredRows} parts={parts} onOpenAddress={openAddress} onChangeStatus={onChangeStatus} onSelectPart={onSelectPart} />
       </section>
 
       <HistoryAddressModal
@@ -151,6 +177,8 @@ export default function RepairRequestsPage() {
           setSelectedAddress(null);
         }}
       />
+
+      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
 
       <RepairPriceModal
         open={priceModalOpen}

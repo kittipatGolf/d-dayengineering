@@ -1,4 +1,5 @@
-﻿import { MultiImageUploader } from "@/components/shared-image/multi-image-uploader";
+import { MultiImageUploader } from "@/components/shared-image/multi-image-uploader";
+import { SearchableSelect } from "@/components/searchable-select";
 import { FormModal } from "../../components/admin-shared/form-modal";
 import type { CategoryKind, ProductCategory } from "../../product-categories/component/types";
 import type { ProductFormState } from "./types";
@@ -63,51 +64,54 @@ export function ProductFormModal({
           <input
             value={form.name}
             onChange={(e) => onFormChange({ ...form, name: e.target.value })}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
           />
         </label>
 
-        <label className="block">
+        <div>
           <span className="mb-1 block text-slate-600">ประเภทสินค้า</span>
-          <select
+          <SearchableSelect
+            options={[
+              { value: "ประตูม้วน", label: "ประตูม้วน" },
+              { value: "อะไหล่", label: "อะไหล่ประตูม้วน" },
+            ]}
             value={form.productType}
-            onChange={(e) => onProductTypeChange(e.target.value as CategoryKind)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
-          >
-            <option value="ประตูม้วน">ประตูม้วน</option>
-            <option value="อะไหล่">อะไหล่ประตูม้วน</option>
-          </select>
-        </label>
+            onChange={(v) => onProductTypeChange(v as CategoryKind)}
+            searchable={false}
+            size="sm"
+          />
+        </div>
 
-        <label className="block">
+        <div>
           <span className="mb-1 block text-slate-600">หมวดหมู่สินค้า</span>
-          <select
-            value={form.categoryId}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
-          >
-            {categoryOptions.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </label>
+          {categoryOptions.length === 0 ? (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700">
+              ยังไม่มีหมวดหมู่ในกลุ่มนี้ กรุณาเพิ่มหมวดหมู่สินค้าก่อน
+            </p>
+          ) : (
+            <SearchableSelect
+              options={categoryOptions.map((item) => ({ value: item.id, label: item.name }))}
+              value={form.categoryId}
+              onChange={onCategoryChange}
+              size="sm"
+            />
+          )}
+        </div>
 
         {form.productType === "ประตูม้วน" ? (
-          <div className="rounded-lg border border-blue-100 bg-blue-50/60 px-3 py-2 text-blue-800">
+          <div className="rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2 text-blue-800">
             ราคา: ราคาตามขนาด
           </div>
         ) : (
           <label className="block">
             <span className="mb-1 block text-slate-600">ราคา</span>
-            <div className="flex rounded-lg border border-slate-200">
+            <div className="flex overflow-hidden rounded-xl border border-slate-200">
               <input
                 type="number"
                 min={0}
                 value={form.price}
                 onChange={(e) => onFormChange({ ...form, price: e.target.value })}
-                className="w-full rounded-l-lg px-3 py-2 outline-none"
+                className="w-full bg-slate-50 px-3 py-2.5 outline-none transition focus:bg-white"
               />
               <span className="flex items-center border-l border-slate-200 bg-slate-50 px-3 text-slate-500">
                 บาท / ชุด
@@ -155,7 +159,7 @@ export function ProductFormModal({
             value={form.description}
             onChange={(e) => onFormChange({ ...form, description: e.target.value })}
             rows={3}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
           />
         </label>
 
@@ -165,7 +169,7 @@ export function ProductFormModal({
             value={form.warrantyYears}
             onChange={(e) => onFormChange({ ...form, warrantyYears: e.target.value })}
             placeholder="ระบุจำนวนปี"
-            className="w-56 rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
+            className="w-56 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
           />
         </label>
 

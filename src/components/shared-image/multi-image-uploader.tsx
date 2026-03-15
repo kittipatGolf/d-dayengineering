@@ -1,13 +1,12 @@
-﻿"use client";
+"use client";
 
 import { useRef, useState } from "react";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { revokeImageUrl, uploadImages } from "@/lib/upload/upload.service";
-import type { UploadedImage } from "@/lib/upload/upload.types";
+import { uploadImages } from "@/lib/upload/upload.service";
 
 type MultiImageUploaderProps = {
-  value: UploadedImage[];
-  onChange: (next: UploadedImage[]) => void;
+  value: string[];
+  onChange: (next: string[]) => void;
   maxFiles?: number;
   maxSizeMB?: number;
 };
@@ -20,11 +19,19 @@ export function MultiImageUploader({
 }: MultiImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
 
   const onPick = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     const maxBytes = maxSizeMB * 1024 * 1024;
+    const oversized = Array.from(files).filter((f) => f.size > maxBytes);
+    if (oversized.length > 0) {
+      setError(`ไฟล์บางรายการเกิน ${maxSizeMB} MB`);
+    } else {
+      setError("");
+    }
+
     const selected = Array.from(files)
       .filter((file) => file.size <= maxBytes)
       .slice(0, Math.max(0, maxFiles - value.length));
@@ -34,17 +41,16 @@ export function MultiImageUploader({
     setUploading(true);
     try {
       const uploaded = await uploadImages(selected);
-      onChange([...value, ...uploaded]);
+      onChange([...value, ...uploaded.map((img) => img.url)]);
+      setError("");
+    } catch {
+      setError("อัปโหลดรูปภาพล้มเหลว กรุณาลองใหม่อีกครั้ง");
     } finally {
       setUploading(false);
     }
   };
 
   const onRemove = (index: number) => {
-    const target = value[index];
-    if (target) {
-      revokeImageUrl(target.url);
-    }
     onChange(value.filter((_, i) => i !== index));
   };
 
@@ -56,6 +62,7 @@ export function MultiImageUploader({
           type="file"
           accept="image/*"
           multiple
+          title="เลือกรูปภาพ"
           className="hidden"
           onChange={(e) => {
             onPick(e.target.files);
@@ -72,17 +79,20 @@ export function MultiImageUploader({
           <PlusIcon className="h-4 w-4" />
           {uploading ? "กำลังอัปโหลด..." : "เลือกรูปภาพ"}
         </button>
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </div>
 
       <div className="p-3">
         {value.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {value.map((img, index) => (
-              <div key={img.id} className="relative">
+            {value.map((url, index) => (
+              <div key={url} className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt={img.name} className="h-16 w-16 rounded-lg object-cover" />
+                <img src={url} alt={`รูป ${index + 1}`} className="h-16 w-16 rounded-lg object-cover" />
                 <button
                   type="button"
+                  title="ลบรูปภาพ"
+                  aria-label={`ลบรูป ${index + 1}`}
                   onClick={() => onRemove(index)}
                   className="absolute -right-1 -top-1 rounded-full bg-slate-900 p-0.5 text-white"
                 >

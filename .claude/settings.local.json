@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(node -e \":*)",
+      "Bash(mkdir -p src/data)",
+      "Bash(PGPASSWORD=IamPangza0987959083za psql -h localhost -U postgres -d d_day_engineering -c \"SELECT status, COUNT\\(*\\) FROM orders GROUP BY status;\")",
+      "Bash(npx tsx:*)"
+    ]
+  }
+}

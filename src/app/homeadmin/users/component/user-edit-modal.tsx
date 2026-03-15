@@ -1,3 +1,4 @@
+import { SearchableSelect } from "@/components/searchable-select";
 import { FormModal } from "../../components/admin-shared/form-modal";
 import type { UserRole } from "./types";
 
@@ -17,6 +18,8 @@ type UserEditModalProps = {
   onFormChange: (next: UserEditState) => void;
   onSubmit: () => void;
 };
+
+const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20";
 
 export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: UserEditModalProps) {
   return (
@@ -50,7 +53,7 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <input
             value={form.username}
             onChange={(event) => onFormChange({ ...form, username: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            className={inputClass}
           />
         </label>
 
@@ -59,7 +62,7 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <input
             value={form.firstName}
             onChange={(event) => onFormChange({ ...form, firstName: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            className={inputClass}
           />
         </label>
 
@@ -68,7 +71,7 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <input
             value={form.lastName}
             onChange={(event) => onFormChange({ ...form, lastName: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            className={inputClass}
           />
         </label>
 
@@ -77,7 +80,7 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <input
             value={form.phone}
             onChange={(event) => onFormChange({ ...form, phone: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            className={inputClass}
           />
         </label>
 
@@ -86,23 +89,24 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <input
             value={form.email}
             onChange={(event) => onFormChange({ ...form, email: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            className={inputClass}
           />
         </label>
 
-        <label className="block">
+        <div>
           <span className="mb-1 block text-sm text-slate-700">บทบาท</span>
-          <select
+          <SearchableSelect
+            options={[
+              { value: "User", label: "User" },
+              { value: "Admin", label: "Admin" },
+            ]}
             value={form.role}
-            onChange={(event) => onFormChange({ ...form, role: event.target.value as UserRole })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
-          >
-            <option value="User">User</option>
-            <option value="Admin">Admin</option>
-          </select>
-        </label>
+            onChange={(v) => onFormChange({ ...form, role: v as UserRole })}
+            searchable={false}
+            size="sm"
+          />
+        </div>
       </div>
     </FormModal>
   );
 }
-

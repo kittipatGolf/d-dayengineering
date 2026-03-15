@@ -1,4 +1,5 @@
 ﻿import {
+  MagnifyingGlassIcon,
   PencilSquareIcon,
   TagIcon,
   TrashIcon,
@@ -15,6 +16,8 @@ type DoorPricingTableProps = {
   onAdd: () => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  keyword: string;
+  onKeywordChange: (value: string) => void;
 };
 
 export function DoorPricingTable({
@@ -25,6 +28,8 @@ export function DoorPricingTable({
   onAdd,
   onEdit,
   onDelete,
+  keyword,
+  onKeywordChange,
 }: DoorPricingTableProps) {
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
@@ -35,11 +40,23 @@ export function DoorPricingTable({
         onAdd={onAdd}
       />
 
-      <FilterTabs
-        options={filterOptions}
-        value={filterValue}
-        onChange={onFilterChange}
-      />
+      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <FilterTabs
+          options={filterOptions}
+          value={filterValue}
+          onChange={onFilterChange}
+          className=""
+        />
+        <label className="relative block w-full sm:max-w-56">
+          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            value={keyword}
+            onChange={(e) => onKeywordChange(e.target.value)}
+            placeholder="ค้นหาราคาประตูม้วน..."
+            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+          />
+        </label>
+      </div>
 
       <div className="mt-4 overflow-x-auto">
         <table className="min-w-full text-left text-sm">
@@ -69,6 +86,7 @@ export function DoorPricingTable({
                   <div className="inline-flex items-center gap-1">
                     <button
                       type="button"
+                      aria-label="แก้ไข"
                       onClick={() => onEdit(row.id)}
                       className="rounded-lg p-1.5 text-slate-600 transition hover:bg-slate-100"
                     >
@@ -76,6 +94,7 @@ export function DoorPricingTable({
                     </button>
                     <button
                       type="button"
+                      aria-label="ลบ"
                       onClick={() => onDelete(row.id)}
                       className="rounded-lg p-1.5 text-rose-600 transition hover:bg-rose-50"
                     >

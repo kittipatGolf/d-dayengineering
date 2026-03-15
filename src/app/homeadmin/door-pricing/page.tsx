@@ -6,6 +6,7 @@ import { productCategoriesService } from "@/lib/services/product-categories.serv
 import type { ProductCategory } from "../product-categories/component/types";
 import { DoorPricingFormModal } from "./component/door-pricing-form-modal";
 import { DoorPricingTable } from "./component/door-pricing-table";
+import { SuccessToast } from "@/components/success-toast";
 import type { DoorPricingFormState, DoorPricingRow } from "./component/types";
 
 function formatThaiDate(date = new Date()) {
@@ -35,6 +36,8 @@ export default function DoorPricingPage() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<DoorPricingFormState>(emptyDoorPricingForm(""));
+  const [keyword, setKeyword] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     productCategoriesService
@@ -46,7 +49,12 @@ export default function DoorPricingPage() {
       })
       .catch(() => setDoorCategories([]));
 
-    doorPricingService.getAll().then(setRows).catch(() => setRows([]));
+    doorPricingService.getAll().then((data) => {
+      setRows(data.map((r) => ({
+        ...r,
+        updatedAt: r.updatedAt ? formatThaiDate(new Date(r.updatedAt)) : formatThaiDate(),
+      })));
+    }).catch(() => setRows([]));
   }, []);
 
   const filterOptions = useMemo(
@@ -55,9 +63,21 @@ export default function DoorPricingPage() {
   );
 
   const filteredRows = useMemo(() => {
-    if (filterValue === "ทั้งหมด") return rows;
-    return rows.filter((row) => row.categoryName === filterValue);
-  }, [filterValue, rows]);
+    let result = rows;
+    if (filterValue !== "ทั้งหมด") {
+      result = result.filter((row) => row.categoryName === filterValue);
+    }
+    const q = keyword.trim().toLowerCase();
+    if (q) {
+      result = result.filter(
+        (row) =>
+          row.categoryName.toLowerCase().includes(q) ||
+          row.thickness.toLowerCase().includes(q) ||
+          String(row.pricePerSqm).includes(q),
+      );
+    }
+    return result;
+  }, [filterValue, rows, keyword]);
 
   const existingThicknesses = useMemo(() => {
     const list = rows
@@ -97,6 +117,7 @@ export default function DoorPricingPage() {
   const onDelete = async (id: string) => {
     await doorPricingService.remove(id);
     setRows((prev) => prev.filter((row) => row.id !== id));
+    setToast("ลบราคาสำเร็จ");
   };
 
   const onSubmit = async () => {
@@ -117,31 +138,37 @@ export default function DoorPricingPage() {
       minArea,
       maxArea,
       pricePerSqm,
-      updatedAt: formatThaiDate(),
     };
 
     if (editingId) {
       const updated = await doorPricingService.update(editingId, payload);
-      setRows((prev) => prev.map((row) => (row.id === editingId ? updated : row)));
+      const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
+      setRows((prev) => prev.map((row) => (row.id === editingId ? formatted : row)));
       closeModal();
+      setToast("แก้ไขราคาสำเร็จ");
       return;
     }
 
     const created = await doorPricingService.create(payload);
-    setRows((prev) => [created, ...prev]);
+    const formatted = { ...created, updatedAt: formatThaiDate(new Date(created.updatedAt)) };
+    setRows((prev) => [formatted, ...prev]);
     closeModal();
+    setToast("เพิ่มราคาสำเร็จ");
   };
 
   return (
-    <div className="rounded-3xl border border-slate-300 bg-slate-100 p-3 shadow-sm md:p-4">
-      <header className="rounded-2xl bg-linear-to-r from-blue-900 to-blue-700 px-5 py-5 text-white shadow-sm">
-        <h1 className="text-2xl font-bold">จัดการราคาประตูม้วน</h1>
-        <p className="mt-1 text-sm text-blue-100">
-          เลือกประเภทจากหน้าจัดการประเภทสินค้า แล้วกำหนดความหนาและช่วงราคาใน flow เดียว
-        </p>
+    <div className="space-y-5">
+      <header className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-6 py-6 text-white shadow-lg">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold">จัดการราคาประตูม้วน</h1>
+          <p className="mt-1 text-sm text-blue-200/80">
+            เลือกประเภทจากหน้าจัดการประเภทสินค้า แล้วกำหนดความหนาและช่วงราคาใน flow เดียว
+          </p>
+        </div>
       </header>
 
-      <section className="mt-4">
+      <section>
         <DoorPricingTable
           rows={filteredRows}
           filterValue={filterValue}
@@ -150,8 +177,12 @@ export default function DoorPricingPage() {
           onAdd={openCreate}
           onEdit={openEdit}
           onDelete={onDelete}
+          keyword={keyword}
+          onKeywordChange={setKeyword}
         />
       </section>
+
+      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
 
       <DoorPricingFormModal
         open={open}

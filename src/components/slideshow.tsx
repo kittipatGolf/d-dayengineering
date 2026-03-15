@@ -72,7 +72,8 @@ export function SlideShow() {
   return (
     <section className="w-full rounded-3xl p-1 md:p-1">
       <div
-        className={`relative min-h-[360px] overflow-hidden rounded-2xl bg-gradient-to-r ${currentSlide.background} p-8 text-white md:min-h-[420px] md:p-10`}
+        key={activeSlide}
+        className={`animate-fade-in relative min-h-[360px] overflow-hidden rounded-2xl bg-gradient-to-r ${currentSlide.background} p-8 text-white md:min-h-[420px] md:p-10`}
       >
         <div className="absolute -right-14 -top-16 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute -bottom-16 -left-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />

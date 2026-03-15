@@ -1,4 +1,4 @@
-﻿import { PencilSquareIcon, TagIcon } from "@heroicons/react/24/outline";
+﻿import { MagnifyingGlassIcon, PencilSquareIcon, TagIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { FilterTabs } from "../../components/admin-shared/filter-tabs";
 import { ListHeaderActions } from "../../components/admin-shared/list-header-actions";
 import type { CategoryKind, ProductCategory } from "./types";
@@ -10,6 +10,9 @@ type ProductCategoriesTableProps = {
   onToggleStatus: (id: string) => void;
   onAddNew: () => void;
   onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+  keyword: string;
+  onKeywordChange: (value: string) => void;
 };
 
 export function ProductCategoriesTable({
@@ -19,6 +22,9 @@ export function ProductCategoriesTable({
   onToggleStatus,
   onAddNew,
   onEdit,
+  onDelete,
+  keyword,
+  onKeywordChange,
 }: ProductCategoriesTableProps) {
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
@@ -29,11 +35,23 @@ export function ProductCategoriesTable({
         onAdd={onAddNew}
       />
 
-      <FilterTabs
-        options={["ทั้งหมด", "ประตูม้วน", "อะไหล่"] as const}
-        value={activeTab}
-        onChange={onTabChange}
-      />
+      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <FilterTabs
+          options={["ทั้งหมด", "ประตูม้วน", "อะไหล่"] as const}
+          value={activeTab}
+          onChange={onTabChange}
+          className=""
+        />
+        <label className="relative block w-full sm:max-w-56">
+          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            value={keyword}
+            onChange={(e) => onKeywordChange(e.target.value)}
+            placeholder="ค้นหาประเภทสินค้า..."
+            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+          />
+        </label>
+      </div>
 
       <div className="mt-4 overflow-x-auto">
         <table className="min-w-full text-left text-sm">
@@ -87,14 +105,24 @@ export function ProductCategoriesTable({
                   </button>
                 </td>
                 <td className="px-3 py-3">
-                  <button
-                    type="button"
-                    onClick={() => onEdit(item.id)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 transition hover:bg-slate-50"
-                  >
-                    <PencilSquareIcon className="h-4 w-4" />
-                    แก้ไข
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(item.id)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <PencilSquareIcon className="h-4 w-4" />
+                      แก้ไข
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(item.id)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs text-rose-600 transition hover:bg-rose-50"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                      ลบ
+                    </button>
+                  </div>
                 </td>
                 <td className="px-3 py-3 text-slate-500">{item.updatedAt}</td>
               </tr>

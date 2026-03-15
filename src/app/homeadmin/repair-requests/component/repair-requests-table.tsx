@@ -1,12 +1,24 @@
 import Image from "next/image";
 import { MapPinIcon } from "@heroicons/react/24/outline";
+import { SearchableSelect } from "@/components/searchable-select";
 import type { RepairRequestItem, RepairRequestStatus } from "./types";
+
+type PartOption = { id: string; name: string; price: number | null };
 
 type RepairRequestsTableProps = {
   rows: RepairRequestItem[];
+  parts: PartOption[];
   onOpenAddress: (item: RepairRequestItem) => void;
   onChangeStatus: (id: string, status: RepairRequestStatus) => void;
+  onSelectPart: (id: string, partName: string) => void;
 };
+
+const statusOptions = [
+  { value: "รอการยืนยัน", label: "รอการยืนยัน" },
+  { value: "ได้รับการยืนยัน", label: "ได้รับการยืนยัน" },
+  { value: "สำเร็จ", label: "สำเร็จ" },
+  { value: "ยกเลิก", label: "ยกเลิก" },
+];
 
 function statusClassName(status: RepairRequestStatus) {
   if (status === "สำเร็จ") return "bg-emerald-100 text-emerald-800";
@@ -15,7 +27,15 @@ function statusClassName(status: RepairRequestStatus) {
   return "bg-amber-100 text-amber-800";
 }
 
-export function RepairRequestsTable({ rows, onOpenAddress, onChangeStatus }: RepairRequestsTableProps) {
+export function RepairRequestsTable({ rows, parts, onOpenAddress, onChangeStatus, onSelectPart }: RepairRequestsTableProps) {
+  const partOptions = [
+    { value: "", label: "-- เลือกอะไหล่ --" },
+    ...parts.map((p) => ({
+      value: p.name,
+      label: p.price != null ? `${p.name} (฿${p.price.toLocaleString()})` : p.name,
+    })),
+  ];
+
   return (
     <div className="mt-4 overflow-x-auto">
       <table className="min-w-full text-left text-sm">
@@ -35,58 +55,71 @@ export function RepairRequestsTable({ rows, onOpenAddress, onChangeStatus }: Rep
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.id} className="border-b border-slate-100">
-              <td className="px-3 py-4 font-medium text-slate-800">{row.username}</td>
-              <td className="px-3 py-4 text-slate-700">{row.repairItem}</td>
-              <td className="px-3 py-4 text-slate-700">{row.detail}</td>
-              <td className="px-3 py-4 text-slate-700">{row.repairDate}</td>
-              <td className="px-3 py-4">
-                <button
-                  type="button"
-                  onClick={() => onOpenAddress(row)}
-                  className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
-                >
-                  <MapPinIcon className="h-3.5 w-3.5" />
-                  ดูที่อยู่
-                </button>
-              </td>
-              <td className="px-3 py-4">
-                <div className="flex flex-wrap gap-1.5">
-                  {row.images.map((image, index) => (
-                    <Image
-                      key={`${row.id}-${index}`}
-                      src={image}
-                      alt={row.repairItem}
-                      width={40}
-                      height={40}
-                      className="h-10 w-10 rounded-md border border-slate-200 object-cover"
-                    />
-                  ))}
-                </div>
-              </td>
-              <td className="px-3 py-4 text-slate-700">{row.selectedPart}</td>
-              <td className="px-3 py-4 text-slate-700">{new Intl.NumberFormat("th-TH").format(row.repairPrice)} บาท</td>
-              <td className="px-3 py-4 text-slate-700">{row.warranty}</td>
-              <td className="px-3 py-4">
-                <span className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${statusClassName(row.status)}`}>
-                  {row.status}
-                </span>
-              </td>
-              <td className="px-3 py-4">
-                <select
-                  value={row.status}
-                  onChange={(event) => onChangeStatus(row.id, event.target.value as RepairRequestStatus)}
-                  className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700"
-                >
-                  <option value="รอการยืนยัน">รอการยืนยัน</option>
-                  <option value="ได้รับการยืนยัน">ได้รับการยืนยัน</option>
-                  <option value="สำเร็จ">สำเร็จ</option>
-                  <option value="ยกเลิก">ยกเลิก</option>
-                </select>
-              </td>
-            </tr>
-          ))}
+          {rows.map((row) => {
+            // Build part options including the current selected part if not in list
+            const rowPartOptions = row.selectedPart && !parts.some((p) => p.name === row.selectedPart)
+              ? [...partOptions, { value: row.selectedPart, label: row.selectedPart }]
+              : partOptions;
+
+            return (
+              <tr key={row.id} className="border-b border-slate-100">
+                <td className="px-3 py-4 font-medium text-slate-800">{row.username}</td>
+                <td className="px-3 py-4 text-slate-700">{row.repairItem}</td>
+                <td className="px-3 py-4 text-slate-700">{row.detail}</td>
+                <td className="px-3 py-4 text-slate-700">{row.repairDate}</td>
+                <td className="px-3 py-4">
+                  <button
+                    type="button"
+                    onClick={() => onOpenAddress(row)}
+                    className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                  >
+                    <MapPinIcon className="h-3.5 w-3.5" />
+                    ดูที่อยู่
+                  </button>
+                </td>
+                <td className="px-3 py-4">
+                  <div className="flex flex-wrap gap-1.5">
+                    {row.images.map((image, index) => (
+                      <Image
+                        key={`${row.id}-${index}`}
+                        src={image}
+                        alt={row.repairItem}
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-md border border-slate-200 object-cover"
+                      />
+                    ))}
+                  </div>
+                </td>
+                <td className="px-3 py-4">
+                  <SearchableSelect
+                    options={rowPartOptions}
+                    value={row.selectedPart}
+                    onChange={(v) => onSelectPart(row.id, v)}
+                    size="sm"
+                    className="min-w-40"
+                  />
+                </td>
+                <td className="px-3 py-4 text-slate-700">{new Intl.NumberFormat("th-TH").format(row.repairPrice)} บาท</td>
+                <td className="px-3 py-4 text-slate-700">{row.warranty}</td>
+                <td className="px-3 py-4">
+                  <span className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${statusClassName(row.status)}`}>
+                    {row.status}
+                  </span>
+                </td>
+                <td className="px-3 py-4">
+                  <SearchableSelect
+                    options={statusOptions}
+                    value={row.status}
+                    onChange={(v) => onChangeStatus(row.id, v as RepairRequestStatus)}
+                    searchable={false}
+                    size="sm"
+                    className="min-w-36"
+                  />
+                </td>
+              </tr>
+            );
+          })}
           {rows.length === 0 ? (
             <tr>
               <td colSpan={11} className="px-3 py-8 text-center text-slate-500">
@@ -99,4 +132,3 @@ export function RepairRequestsTable({ rows, onOpenAddress, onChangeStatus }: Rep
     </div>
   );
 }
-
