@@ -50,23 +50,23 @@ export function ProductCategoryForm({
       title={editing ? "แก้ไขประเภทสินค้า" : "เพิ่มประเภทสินค้า"}
       onClose={onClose}
       footer={
-        <>
+        <div className="flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-rose-600 px-4 py-2 font-semibold text-white transition hover:bg-rose-700"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
             ยกเลิก
           </button>
           <button
             type="button"
             onClick={onSubmit}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
           >
             <CheckCircleIcon className="h-5 w-5" />
             {editing ? "บันทึกการแก้ไข" : "เพิ่มทันที"}
           </button>
-        </>
+        </div>
       }
     >
       <div className="space-y-4 text-sm">
@@ -157,17 +157,24 @@ export function ProductCategoryForm({
           <button
             type="button"
             onClick={() => onStatusChange(!isActive)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
-              isActive ? "bg-blue-600" : "bg-slate-300"
-            }`}
+            aria-label="สลับสถานะ"
+            className="inline-flex items-center gap-2.5"
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                isActive ? "translate-x-6" : "translate-x-1"
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ${
+                isActive ? "bg-emerald-500" : "bg-slate-300"
               }`}
-            />
+            >
+              <span
+                className={`pointer-events-none absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm ring-1 ring-black/5 transition-transform duration-200 ${
+                  isActive ? "translate-x-4" : "translate-x-0.5"
+                }`}
+              />
+            </span>
+            <span className={`text-xs font-medium ${isActive ? "text-emerald-700" : "text-slate-500"}`}>
+              {isActive ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+            </span>
           </button>
-          <span className="text-slate-500">{isActive ? "เปิดใช้งาน" : "ปิดใช้งาน"}</span>
         </div>
       </div>
     </FormModal>

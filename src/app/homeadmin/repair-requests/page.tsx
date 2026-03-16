@@ -1,8 +1,6 @@
 "use client";
 
-import { MagnifyingGlassIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useEffect, useMemo, useState } from "react";
-import { FilterTabs } from "../components/admin-shared/filter-tabs";
 import { HistoryAddressModal } from "../history/component/history-address-modal";
 import { repairRequestsService } from "@/lib/services/repair-requests.service";
 import { RepairPriceModal } from "./component/repair-price-modal";
@@ -138,35 +136,18 @@ export default function RepairRequestsPage() {
         </div>
       </header>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <FilterTabs
-            options={["ทั้งหมด", "รอการยืนยัน", "ได้รับการยืนยัน"] as const}
-            value={tab}
-            onChange={setTab}
-            className="mt-0 grow"
-          />
-          <label className="relative block w-full max-w-[300px]">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-            <input
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder="ค้นหาข้อมูลส่งซ่อม"
-              className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 outline-none transition focus:border-blue-500"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={openInitialPriceModal}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            <PencilSquareIcon className="h-4 w-4" />
-            แก้ไขราคาซ่อมเริ่มต้น
-          </button>
-        </div>
-
-        <RepairRequestsTable rows={filteredRows} parts={parts} onOpenAddress={openAddress} onChangeStatus={onChangeStatus} onSelectPart={onSelectPart} />
-      </section>
+      <RepairRequestsTable
+        rows={filteredRows}
+        parts={parts}
+        activeTab={tab}
+        onTabChange={setTab}
+        keyword={keyword}
+        onKeywordChange={setKeyword}
+        onOpenAddress={openAddress}
+        onChangeStatus={onChangeStatus}
+        onSelectPart={onSelectPart}
+        onEditInitialPrice={openInitialPriceModal}
+      />
 
       <HistoryAddressModal
         open={addressModalOpen}

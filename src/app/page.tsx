@@ -4,7 +4,7 @@ import { StoreProductsSection } from "@/components/store-products-section";
 
 export default function Home() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-12">
       <SlideShow />
       <ServicesSection />
       <StoreProductsSection />

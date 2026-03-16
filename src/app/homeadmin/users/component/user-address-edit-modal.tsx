@@ -38,13 +38,22 @@ export function UserAddressEditModal({
       title="แก้ไขที่อยู่"
       maxWidthClassName="max-w-4xl"
       footer={
-        <button
-          type="button"
-          onClick={onSubmit}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-base font-semibold text-white hover:bg-blue-700"
-        >
-          บันทึก
-        </button>
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            onClick={onSubmit}
+            className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
+          >
+            บันทึก
+          </button>
+        </div>
       }
     >
       <div className="space-y-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { SearchableSelect } from "@/components/searchable-select";
 import { getRecentYears } from "../year-options";
 
@@ -27,8 +28,12 @@ export function UserStatisticsPanel() {
   const [users, setUsers] = useState<UserOption[]>([]);
   const [selectedUser, setSelectedUser] = useState("");
   const [data, setData] = useState<UserData>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     const params = new URLSearchParams({ type: "user-stats" });
     if (selectedUser) {
       params.set("userId", selectedUser);
@@ -39,12 +44,17 @@ export function UserStatisticsPanel() {
 
     try {
       const res = await fetch(`/api/dashboard?${params}`);
-      if (!res.ok) return;
+      if (!res.ok) {
+        setError(res.status === 401 || res.status === 403 ? "ไม่มีสิทธิ์เข้าถึงข้อมูล" : "ไม่สามารถโหลดข้อมูลได้");
+        return;
+      }
       const json = await res.json();
       setUsers(json.users ?? []);
       setData(json.data);
     } catch {
-      /* ignore */
+      setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } finally {
+      setLoading(false);
     }
   }, [selectedUser, period, year, month]);
 
@@ -117,11 +127,18 @@ export function UserStatisticsPanel() {
         )}
       </div>
 
-      {!selectedUser && (
+      {loading ? (
+        <div className="mt-6 flex items-center justify-center py-12">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+        </div>
+      ) : error ? (
+        <div className="mt-6 flex flex-col items-center justify-center gap-2 py-12 text-center">
+          <ExclamationTriangleIcon className="h-8 w-8 text-amber-400" />
+          <p className="text-sm text-slate-500">{error}</p>
+        </div>
+      ) : !selectedUser ? (
         <p className="mt-4 text-slate-500">กรุณาเลือกผู้ใช้</p>
-      )}
-
-      {selectedUser && data && (
+      ) : data ? (
         <>
           <div className="mt-3 flex items-center gap-4 text-sm text-slate-600">
             <span className="flex items-center gap-1">
@@ -162,7 +179,7 @@ export function UserStatisticsPanel() {
             <span className="text-pink-700">ค่าซ่อมรวม: {totalRepairs.toLocaleString()} บาท</span>
           </div>
         </>
-      )}
+      ) : null}
     </section>
   );
 }

@@ -100,27 +100,31 @@ export default function HistoryPage() {
         </div>
       </header>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <HistorySummaryCards total={activeRowsCount} completed={completedCount} canceled={canceledCount} />
+
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        {/* toolbar: tabs + search */}
+        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/60 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
           <FilterTabs
             options={["ประวัติแจ้งซ่อม", "ประวัติสินค้า"] as const}
             value={tab}
             onChange={setTab}
-            className="mt-0 grow"
+            className=""
           />
-          <label className="relative block w-full max-w-[300px]">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <label className="relative block w-full sm:max-w-56">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder={tab === "ประวัติแจ้งซ่อม" ? "ค้นหาประวัติแจ้งซ่อม" : "ค้นหาประวัติสินค้า"}
-              className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 outline-none transition focus:border-blue-500"
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder={tab === "ประวัติแจ้งซ่อม" ? "ค้นหาประวัติแจ้งซ่อม..." : "ค้นหาประวัติสินค้า..."}
+              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
           </label>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold text-slate-700">สถานะ</span>
+        {/* status filter */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 px-5 py-3">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">สถานะ</span>
           <FilterTabs
             options={["ทั้งหมด", "สำเร็จ", "ยกเลิก"] as const}
             value={tab === "ประวัติแจ้งซ่อม" ? repairStatusFilter : productStatusFilter}
@@ -131,11 +135,9 @@ export default function HistoryPage() {
                 setProductStatusFilter(value);
               }
             }}
-            className="mt-0"
+            className=""
           />
         </div>
-
-        <HistorySummaryCards total={activeRowsCount} completed={completedCount} canceled={canceledCount} />
 
         {tab === "ประวัติแจ้งซ่อม" ? (
           <HistoryRepairsTable rows={filteredRepairRows} onOpenAddress={openRepairAddress} />
@@ -146,7 +148,7 @@ export default function HistoryPage() {
             onOpenItems={openProductItems}
           />
         )}
-      </section>
+      </div>
 
       <HistoryAddressModal
         open={addressModalOpen}

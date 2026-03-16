@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { XMarkIcon, PhotoIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, PhotoIcon, EyeIcon, CameraIcon } from "@heroicons/react/24/outline";
 import { SearchBar } from "@/components/search-bar";
+import { ProductImageCarousel } from "@/components/product-image-carousel";
 
 type PortfolioItem = {
   id: string;
@@ -16,7 +17,6 @@ export default function PortfolioPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<PortfolioItem | null>(null);
-  const [slideIndex, setSlideIndex] = useState(0);
 
   useEffect(() => {
     fetch("/api/portfolio")
@@ -35,9 +35,23 @@ export default function PortfolioPage() {
     : items;
 
   return (
-    <section className="space-y-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-10">
-      <h1 className="text-center text-2xl sm:text-4xl font-bold text-slate-900">ผลงานของเรา</h1>
+    <section className="space-y-8">
+      {/* Hero header */}
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-8 py-12 text-white shadow-lg md:px-14 md:py-16">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-blue-400/10 blur-3xl" />
+        <div className="relative text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+            <CameraIcon className="h-8 w-8" />
+          </div>
+          <h1 className="text-3xl font-bold md:text-5xl">ผลงานของเรา</h1>
+          <p className="mx-auto mt-3 max-w-xl text-base text-blue-200/80">
+            ผลงานติดตั้งและซ่อมประตูม้วนจาก D-Day Engineering
+          </p>
+        </div>
+      </div>
 
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-10">
       <div className="mx-auto sm:ml-auto sm:mr-0 w-full max-w-md">
         <SearchBar className="max-w-none" value={query} onChange={setQuery} />
       </div>
@@ -54,7 +68,7 @@ export default function PortfolioPage() {
             <button
               key={item.id}
               type="button"
-              onClick={() => { setSlideIndex(0); setSelected(item); }}
+              onClick={() => setSelected(item)}
               className="animate-fade-in-up group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 text-left"
               style={{ animationDelay: `${i * 80}ms` }}
             >
@@ -100,6 +114,8 @@ export default function PortfolioPage() {
         </div>
       )}
 
+      </div>
+
       {/* Detail modal with carousel */}
       {selected && (
         <>
@@ -109,11 +125,7 @@ export default function PortfolioPage() {
             role="dialog"
             aria-modal="true"
             onClick={() => setSelected(null)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setSelected(null);
-              if (e.key === "ArrowLeft" && slideIndex > 0) setSlideIndex(slideIndex - 1);
-              if (e.key === "ArrowRight" && slideIndex < selected.images.length - 1) setSlideIndex(slideIndex + 1);
-            }}
+            onKeyDown={(e) => { if (e.key === "Escape") setSelected(null); }}
           >
             <div
               className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
@@ -133,80 +145,15 @@ export default function PortfolioPage() {
               </div>
 
               {/* Image carousel */}
-              <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-100">
-                {selected.images.length > 0 ? (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={selected.images[slideIndex]}
-                      alt={`${selected.title} - รูปที่ ${slideIndex + 1}`}
-                      className="h-full w-full object-cover transition-opacity duration-300"
-                    />
-
-                    {selected.images.length > 1 && (
-                      <>
-                        {/* Prev */}
-                        <button
-                          type="button"
-                          onClick={() => setSlideIndex((slideIndex - 1 + selected.images.length) % selected.images.length)}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-slate-700 shadow-md backdrop-blur-sm transition hover:bg-white"
-                          aria-label="รูปก่อนหน้า"
-                        >
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
-                        </button>
-                        {/* Next */}
-                        <button
-                          type="button"
-                          onClick={() => setSlideIndex((slideIndex + 1) % selected.images.length)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-slate-700 shadow-md backdrop-blur-sm transition hover:bg-white"
-                          aria-label="รูปถัดไป"
-                        >
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
-                        </button>
-
-                        {/* Dots */}
-                        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5">
-                          {selected.images.map((_, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => setSlideIndex(idx)}
-                              className={`h-2 rounded-full transition-all ${idx === slideIndex ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/80"}`}
-                              aria-label={`ไปรูปที่ ${idx + 1}`}
-                            />
-                          ))}
-                        </div>
-
-                        {/* Counter */}
-                        <span className="absolute top-3 left-3 rounded-full bg-black/50 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
-                          {slideIndex + 1} / {selected.images.length}
-                        </span>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex h-full items-center justify-center bg-linear-to-br from-slate-300 via-slate-500 to-slate-700">
+              <ProductImageCarousel
+                images={selected.images}
+                alt={selected.title}
+                emptySlot={
+                  <div className="flex aspect-4/3 items-center justify-center bg-linear-to-br from-slate-300 via-slate-500 to-slate-700">
                     <PhotoIcon className="h-16 w-16 text-white/50" />
                   </div>
-                )}
-              </div>
-
-              {/* Thumbnail strip */}
-              {selected.images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto border-b border-slate-200 bg-slate-50 p-3">
-                  {selected.images.map((src, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setSlideIndex(idx)}
-                      className={`shrink-0 h-16 w-16 overflow-hidden rounded-lg border-2 transition ${idx === slideIndex ? "border-blue-500 ring-2 ring-blue-200" : "border-transparent opacity-60 hover:opacity-100"}`}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={src} alt={`thumb ${idx + 1}`} className="h-full w-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
+                }
+              />
 
               {/* Description */}
               {selected.description && (

@@ -6,6 +6,7 @@ import { SearchBar } from "@/components/search-bar";
 import { SearchableSelect } from "@/components/searchable-select";
 import { useCart } from "@/lib/cart-context";
 import { ShoppingCartIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ProductImageCarousel } from "@/components/product-image-carousel";
 
 type DoorPricingRow = {
   id: string;
@@ -148,10 +149,23 @@ export default function DoorsPage() {
   };
 
   return (
-    <section className="space-y-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-10">
-      <h1 className="text-center text-2xl sm:text-4xl font-bold text-slate-900">ประตูม้วน</h1>
+    <section className="space-y-8">
+      {/* Hero header */}
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-8 py-12 text-white shadow-lg md:px-14 md:py-16">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-blue-400/10 blur-3xl" />
+        <div className="relative text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+            <ShoppingCartIcon className="h-8 w-8" />
+          </div>
+          <h1 className="text-3xl font-bold md:text-5xl">ประตูม้วน</h1>
+          <p className="mx-auto mt-3 max-w-xl text-base text-blue-200/80">
+            เลือกประตูม้วนคุณภาพจาก D-Day Engineering ติดตั้งโดยช่างมืออาชีพ
+          </p>
+        </div>
+      </div>
 
-      <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+      <div className="grid gap-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-10 lg:grid-cols-[260px_1fr]">
         <aside className="h-fit space-y-4">
           <SearchBar className="max-w-none" value={query} onChange={setQuery} />
           <CategoryFilterPanel
@@ -224,54 +238,60 @@ export default function DoorsPage() {
           onClick={() => setDetailProduct(null)}
         >
           <div
-            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Image carousel */}
+            <ProductImageCarousel
+              images={detailProduct.images}
+              alt={detailProduct.name}
+              emptySlot={
+                <div className="flex aspect-4/3 items-center justify-center bg-linear-to-br from-blue-900 via-blue-800 to-slate-900">
+                  <ShoppingCartIcon className="h-16 w-16 text-white/30" />
+                </div>
+              }
+            />
+
+            {/* Close button */}
             <button
               type="button"
               aria-label="ปิด"
               onClick={() => setDetailProduct(null)}
-              className="absolute right-3 top-3 z-10 rounded-full bg-white/80 p-1 text-slate-400 hover:text-slate-700"
+              className="absolute right-3 top-3 z-10 rounded-full bg-black/30 p-1.5 text-white backdrop-blur-sm transition hover:bg-black/50"
             >
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon className="h-5 w-5" />
             </button>
 
-            {detailProduct.images.length > 0 ? (
-              <div className="flex gap-1 overflow-x-auto">
-                {detailProduct.images.map((img, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={i}
-                    src={img}
-                    alt={`${detailProduct.name} ${i + 1}`}
-                    className="h-56 min-w-[50%] flex-1 object-cover first:rounded-tl-2xl last:rounded-tr-2xl"
-                  />
-                ))}
+            {/* Content */}
+            <div className="max-h-[50vh] overflow-y-auto p-6">
+              <div className="space-y-4">
+                <div>
+                  <span className="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                    {detailProduct.categoryName}
+                  </span>
+                  <h2 className="mt-2 text-xl font-bold text-slate-900">{detailProduct.name}</h2>
+                </div>
+
+                {detailProduct.description && (
+                  <p className="text-sm leading-relaxed text-slate-600">{detailProduct.description}</p>
+                )}
+
+                <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
+                    <ShoppingCartIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-semibold text-blue-800">ราคาคำนวณตามขนาดพื้นที่และความหนา</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => { setDetailProduct(null); openModal(detailProduct.categoryName); }}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
+                >
+                  <ShoppingCartIcon className="h-5 w-5" />
+                  สั่งซื้อประตูม้วน
+                </button>
               </div>
-            ) : (
-              <div className="flex h-56 items-center justify-center rounded-t-2xl bg-linear-to-br from-zinc-500 via-zinc-700 to-zinc-900">
-                <span className="text-5xl text-white/60">🚪</span>
-              </div>
-            )}
-
-            <div className="space-y-3 p-5">
-              <h2 className="text-xl font-bold text-slate-900">{detailProduct.name}</h2>
-              <p className="text-sm text-slate-500">ประเภท: {detailProduct.categoryName}</p>
-
-              {detailProduct.description && (
-                <p className="text-sm leading-relaxed text-slate-700">{detailProduct.description}</p>
-              )}
-
-              <p className="text-sm font-semibold text-blue-700">ราคาขึ้นอยู่กับขนาดและความหนา</p>
-
-              <button
-                type="button"
-                onClick={() => { setDetailProduct(null); openModal(detailProduct.categoryName); }}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-blue-700 active:scale-95"
-              >
-                <ShoppingCartIcon className="h-5 w-5" />
-                สั่งซื้อประตูม้วน
-              </button>
             </div>
           </div>
         </div>
@@ -280,19 +300,30 @@ export default function DoorsPage() {
       {/* ---------- Order Modal ---------- */}
       {modalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm md:p-8"
           role="dialog"
           aria-modal="true"
           onKeyDown={(e) => { if (e.key === "Escape") setModalOpen(false); }}
           onClick={() => setModalOpen(false)}
         >
-          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-100 bg-white p-5 shadow-2xl sm:p-6" onClick={(e) => e.stopPropagation()}>
-            <button type="button" aria-label="ปิด" onClick={() => setModalOpen(false)} className="absolute right-4 top-4 rounded-xl p-1 text-slate-400 hover:text-slate-700">
-              <XMarkIcon className="h-6 w-6" />
-            </button>
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* Gradient header */}
+            <div className="relative bg-linear-to-r from-blue-600 to-blue-700 px-6 py-5">
+              <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
+                    <ShoppingCartIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-white">สั่งซื้อประตูม้วน</h2>
+                </div>
+                <button type="button" aria-label="ปิด" onClick={() => setModalOpen(false)} className="rounded-xl p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white">
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
 
-            <h2 className="mb-5 text-xl font-bold text-slate-900">สั่งซื้อประตูม้วน</h2>
-
+            <div className="max-h-[70vh] overflow-y-auto p-5 sm:p-6">
             <div className="space-y-4">
               <SearchableSelect
                 id="door-type"
@@ -353,10 +384,11 @@ export default function DoorsPage() {
                 )}
               </div>
 
-              <button type="button" onClick={handleAddToCart} disabled={!selectedDoorType || !width || !length || !thickness || !color || calculatedPrice <= 0} className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500">
+              <button type="button" onClick={handleAddToCart} disabled={!selectedDoorType || !width || !length || !thickness || !color || calculatedPrice <= 0} className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none">
                 <ShoppingCartIcon className="h-5 w-5" />
                 เพิ่มลงตะกร้า
               </button>
+            </div>
             </div>
           </div>
         </div>

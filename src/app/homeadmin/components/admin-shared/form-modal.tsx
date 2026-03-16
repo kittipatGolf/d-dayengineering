@@ -31,21 +31,25 @@ export function FormModal({
         aria-labelledby="form-modal-title"
         onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}
       >
-        <div className={`w-full rounded-2xl bg-white shadow-2xl ${maxWidthClassName ?? "max-w-5xl"}`}>
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h2 id="form-modal-title" className="text-lg font-bold text-slate-900">{title}</h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-              aria-label="ปิดโมดอล"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
+        <div className={`w-full overflow-hidden rounded-2xl bg-white shadow-2xl ${maxWidthClassName ?? "max-w-5xl"}`}>
+          {/* gradient header */}
+          <div className="relative bg-linear-to-r from-blue-600 to-blue-700 px-6 py-4">
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+            <div className="relative flex items-center justify-between">
+              <h2 id="form-modal-title" className="text-lg font-bold text-white">{title}</h2>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-xl p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
+                aria-label="ปิดโมดอล"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
           <div className="max-h-[75vh] overflow-y-auto px-6 py-5">{children}</div>
-          <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">{footer}</div>
+          <div className="border-t border-slate-100 bg-slate-50/50 px-6 py-4">{footer}</div>
         </div>
       </div>
     </>

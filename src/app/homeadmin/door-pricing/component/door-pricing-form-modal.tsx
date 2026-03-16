@@ -31,22 +31,22 @@ export function DoorPricingFormModal({
       onClose={onClose}
       maxWidthClassName="max-w-3xl"
       footer={
-        <>
+        <div className="flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-rose-600 px-4 py-2 font-semibold text-white transition hover:bg-rose-700"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
             ยกเลิก
           </button>
           <button
             type="button"
             onClick={onSubmit}
-            className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+            className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
           >
             {editing ? "บันทึกการแก้ไข" : "บันทึก"}
           </button>
-        </>
+        </div>
       }
     >
       <div className="space-y-4 text-sm">

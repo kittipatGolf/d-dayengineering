@@ -1,9 +1,7 @@
 "use client";
 
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useEffect, useMemo, useState } from "react";
 import { HistoryAddressModal } from "../history/component/history-address-modal";
-import { FilterTabs } from "../components/admin-shared/filter-tabs";
 import { ordersService } from "@/lib/services/orders.service";
 import { productCategoriesService } from "@/lib/services/product-categories.service";
 import { OrderItemsModal } from "./component/order-items-modal";
@@ -117,33 +115,17 @@ export default function OrdersPage() {
         </div>
       </header>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <FilterTabs
-            options={["ทั้งหมด", "รอการยืนยัน", "ได้รับการยืนยัน"] as const}
-            value={tab}
-            onChange={setTab}
-            className="mt-0 grow"
-          />
-          <label className="relative block w-full max-w-[300px]">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-            <input
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder="ค้นหาข้อมูลคำสั่งซื้อ"
-              className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 outline-none transition focus:border-blue-500"
-            />
-          </label>
-        </div>
-
-        <OrdersTable
-          rows={filteredRows}
-          onOpenAddress={openAddress}
-          onOpenItems={openItems}
-          onOpenSummary={openSummary}
-          onChangeStatus={changeStatus}
-        />
-      </section>
+      <OrdersTable
+        rows={filteredRows}
+        activeTab={tab}
+        onTabChange={setTab}
+        keyword={keyword}
+        onKeywordChange={setKeyword}
+        onOpenAddress={openAddress}
+        onOpenItems={openItems}
+        onOpenSummary={openSummary}
+        onChangeStatus={changeStatus}
+      />
 
       <HistoryAddressModal
         open={addressModalOpen}

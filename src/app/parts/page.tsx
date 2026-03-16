@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { CategoryFilterPanel } from "@/components/category-filter-panel";
 import { SearchBar } from "@/components/search-bar";
 import { useCart } from "@/lib/cart-context";
-import { ShoppingCartIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon, ShoppingCartIcon, ShieldCheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ProductImageCarousel } from "@/components/product-image-carousel";
 
 type ProductItem = {
   id: string;
@@ -89,10 +90,23 @@ export default function PartsPage() {
   };
 
   return (
-    <section className="space-y-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-10">
-      <h1 className="text-center text-2xl sm:text-4xl font-bold text-slate-900">อะไหล่ประตูม้วน</h1>
+    <section className="space-y-8">
+      {/* Hero header */}
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-indigo-900 via-blue-800 to-slate-900 px-8 py-12 text-white shadow-lg md:px-14 md:py-16">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-indigo-400/10 blur-3xl" />
+        <div className="relative text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+            <Cog6ToothIcon className="h-8 w-8" />
+          </div>
+          <h1 className="text-3xl font-bold md:text-5xl">อะไหล่ประตูม้วน</h1>
+          <p className="mx-auto mt-3 max-w-xl text-base text-blue-200/80">
+            อะไหล่แท้คุณภาพสูง มอเตอร์ รีโมท สปริง โซ่ รอก พร้อมจัดส่งและติดตั้ง
+          </p>
+        </div>
+      </div>
 
-      <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+      <div className="grid gap-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-10 lg:grid-cols-[260px_1fr]">
         <aside className="h-fit space-y-4">
           <SearchBar className="max-w-none" value={query} onChange={setQuery} />
           <CategoryFilterPanel
@@ -159,7 +173,7 @@ export default function PartsPage() {
       {/* ---------- Detail Modal ---------- */}
       {detailItem && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-label={`รายละเอียด ${detailItem.name}`}
@@ -167,61 +181,66 @@ export default function PartsPage() {
           onClick={() => setDetailItem(null)}
         >
           <div
-            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Close */}
             <button
               type="button"
               aria-label="ปิด"
               onClick={() => setDetailItem(null)}
-              className="absolute right-3 top-3 z-10 rounded-full bg-white/80 p-1 text-slate-400 hover:text-slate-700"
+              className="absolute right-3 top-3 z-10 rounded-full bg-black/30 p-1.5 text-white backdrop-blur-sm transition hover:bg-black/50"
             >
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon className="h-5 w-5" />
             </button>
 
-            {/* images */}
-            {detailItem.images.length > 0 ? (
-              <div className="flex gap-1 overflow-x-auto">
-                {detailItem.images.map((img, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={i}
-                    src={img}
-                    alt={`${detailItem.name} ${i + 1}`}
-                    className="h-56 min-w-[50%] flex-1 object-cover first:rounded-tl-2xl last:rounded-tr-2xl"
-                  />
-                ))}
+            {/* Image carousel */}
+            <ProductImageCarousel
+              images={detailItem.images}
+              alt={detailItem.name}
+              emptySlot={
+                <div className="flex aspect-4/3 items-center justify-center bg-linear-to-br from-indigo-900 via-blue-800 to-slate-900">
+                  <Cog6ToothIcon className="h-16 w-16 text-white/30" />
+                </div>
+              }
+            />
+
+            {/* Content */}
+            <div className="max-h-[50vh] overflow-y-auto p-6">
+              <div className="space-y-4">
+                <div>
+                  <span className="inline-flex items-center rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                    {detailItem.categoryName}
+                  </span>
+                  <h2 className="mt-2 text-xl font-bold text-slate-900">{detailItem.name}</h2>
+                </div>
+
+                {detailItem.description && (
+                  <p className="text-sm leading-relaxed text-slate-600">{detailItem.description}</p>
+                )}
+
+                {/* Price & warranty row */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-2xl font-bold text-blue-700">
+                    {detailItem.price ? `฿${detailItem.price.toLocaleString("th-TH")}` : "สอบถามราคา"}
+                  </span>
+                  {detailItem.warrantyYears && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                      <ShieldCheckIcon className="h-3.5 w-3.5" />
+                      รับประกัน {detailItem.warrantyYears} ปี
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => { handleAddToCart(detailItem); setDetailItem(null); }}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-[0.98]"
+                >
+                  <ShoppingCartIcon className="h-5 w-5" />
+                  เพิ่มลงตะกร้า
+                </button>
               </div>
-            ) : (
-              <div className="flex h-56 items-center justify-center rounded-t-2xl bg-linear-to-br from-slate-200 via-slate-400 to-slate-600">
-                <span className="text-5xl text-white/60">🔩</span>
-              </div>
-            )}
-
-            <div className="space-y-3 p-5">
-              <h2 className="text-xl font-bold text-slate-900">{detailItem.name}</h2>
-              <p className="text-sm text-slate-500">หมวดหมู่: {detailItem.categoryName}</p>
-
-              {detailItem.description && (
-                <p className="text-sm leading-relaxed text-slate-700">{detailItem.description}</p>
-              )}
-
-              {detailItem.warrantyYears && (
-                <p className="text-sm text-slate-600">รับประกัน: {detailItem.warrantyYears} ปี</p>
-              )}
-
-              <p className="text-lg font-bold text-blue-700">
-                {detailItem.price ? `${detailItem.price.toLocaleString("th-TH")} บาท` : "ราคาไม่ระบุ"}
-              </p>
-
-              <button
-                type="button"
-                onClick={() => { handleAddToCart(detailItem); setDetailItem(null); }}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-green-700 active:scale-95"
-              >
-                <ShoppingCartIcon className="h-5 w-5" />
-                เพิ่มลงตะกร้า
-              </button>
             </div>
           </div>
         </div>

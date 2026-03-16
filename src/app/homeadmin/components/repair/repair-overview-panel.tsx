@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { ReportFilterControls } from "../report-filter-controls";
 import { getRecentYears } from "../year-options";
 
@@ -28,14 +29,22 @@ export function RepairOverviewPanel() {
   const [year, setYear] = useState<number>(years[0]);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
   const [chartData, setChartData] = useState<ChartItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({ type: "repairs", period });
       if (period === "month") params.set("year", String(year));
 
       const res = await fetch(`/api/dashboard?${params}`);
-      if (!res.ok) return;
+      if (!res.ok) {
+        setError(res.status === 401 || res.status === 403 ? "ไม่มีสิทธิ์เข้าถึงข้อมูล" : "ไม่สามารถโหลดข้อมูลได้");
+        setChartData([]);
+        return;
+      }
       const rows: { year?: number; month?: number; total: number }[] = await res.json();
 
       if (period === "year") {
@@ -57,7 +66,10 @@ export function RepairOverviewPanel() {
         );
       }
     } catch {
-      /* ignore */
+      setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      setChartData([]);
+    } finally {
+      setLoading(false);
     }
   }, [period, year, years, selectedMonth]);
 
@@ -68,7 +80,7 @@ export function RepairOverviewPanel() {
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-3xl font-bold text-slate-800">ค่าซ่อมสินค้า</h2>
+      <h2 className="text-2xl font-bold text-slate-900">ค่าซ่อมสินค้า</h2>
 
       <ReportFilterControls
         idPrefix="repair"
@@ -84,46 +96,53 @@ export function RepairOverviewPanel() {
         onMonthChange={setSelectedMonth}
       />
 
-      <div className="mt-3 flex items-center justify-center gap-2 text-[14px] text-slate-600">
-        <span className="h-3 w-8 rounded-sm bg-pink-300" />
-        <span>ค่าซ่อม (บาท)</span>
-      </div>
-
-      <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
-        <div className="relative h-72">
-          <div className="absolute inset-0 grid grid-rows-10">
-            {Array.from({ length: 10 }).map((_, index) => (
-              <span key={index} className="border-b border-slate-200" />
-            ))}
+      <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="relative h-56">
+          {/* grid lines */}
+          <div className="absolute inset-0 grid grid-rows-5">
+            <span className="border-b border-slate-200" />
+            <span className="border-b border-slate-200" />
+            <span className="border-b border-slate-200" />
+            <span className="border-b border-slate-200" />
+            <span className="border-b border-slate-200" />
           </div>
 
-          <div className="relative flex h-full items-end gap-2 overflow-x-auto pb-1">
-            {chartData.map((item) => {
-              const barHeight = Math.max((item.value / highestValue) * 100, 3);
-
-              return (
-                <div
-                  key={item.label}
-                  className="flex min-w-[48px] flex-1 flex-col items-center gap-2"
-                >
+          {loading ? (
+            <div className="relative flex h-full items-center justify-center">
+              <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-pink-500" />
+            </div>
+          ) : error ? (
+            <div className="relative flex h-full flex-col items-center justify-center gap-2 text-center">
+              <ExclamationTriangleIcon className="h-8 w-8 text-amber-400" />
+              <p className="text-sm text-slate-500">{error}</p>
+            </div>
+          ) : (
+            <div className="relative flex h-full items-end gap-3 overflow-x-auto pb-1">
+              {chartData.map((item) => {
+                const barHeight = Math.max((item.value / highestValue) * 100, 5);
+                return (
                   <div
-                    className={`w-full rounded-t-md ${
-                      item.active ? "bg-rose-500" : "bg-pink-300"
-                    }`}
-                    style={{ height: `${barHeight}%` }}
-                    title={`${item.label}: ${item.value.toLocaleString()} บาท`}
-                  />
-                  <span className="text-xs text-slate-600">{item.label}</span>
-                </div>
-              );
-            })}
-          </div>
+                    key={item.label}
+                    className="flex min-w-11 flex-1 flex-col items-center gap-2"
+                  >
+                    <div
+                      className={`w-full rounded-t-md transition-all ${
+                        item.active ? "bg-rose-500" : "bg-pink-300"
+                      }`}
+                      style={{ height: `${barHeight}%` }}
+                      title={`${item.label}: ${item.value.toLocaleString()} บาท`}
+                    />
+                    <span className="text-xs font-medium text-slate-600">{item.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      <p className="mt-4 text-3xl font-bold text-red-600">
-        ค่าซ่อมรวม{period === "month" ? "เดือน" : "ปี"} -:{" "}
-        {totalRepairCost.toLocaleString()} บาท
+      <p className="mt-4 text-lg font-semibold text-rose-700">
+        ค่าซ่อมรวมทั้งหมด: {totalRepairCost.toLocaleString()} บาท
       </p>
     </section>
   );

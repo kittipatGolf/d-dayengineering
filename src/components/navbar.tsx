@@ -97,38 +97,36 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-1.5 lg:flex">
+        {/* Desktop nav — no icons to save space */}
+        <nav className="hidden min-w-0 items-center gap-0.5 xl:flex">
           {navItems.map((item) => {
-            const Icon = item.icon;
             const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[15px] font-medium transition-all duration-200 ${
+                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 ${
                   active
                     ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
-                <Icon className="h-5 w-5" />
-                <span className="truncate">{item.label}</span>
+                {item.label}
               </Link>
             );
           })}
         </nav>
 
         {/* Desktop right actions */}
-        <div className="hidden shrink-0 items-center gap-2 lg:flex">
+        <div className="hidden shrink-0 items-center gap-1.5 xl:flex">
           <Link
             href="/cart"
-            className="relative inline-flex items-center rounded-full p-2.5 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+            className="relative inline-flex items-center rounded-full p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
             aria-label="ตะกร้าสินค้า"
           >
-            <ShoppingCartIcon className="h-6 w-6" />
+            <ShoppingCartIcon className="h-5 w-5" />
             {totalItems > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
                 {totalItems > 9 ? "9+" : totalItems}
               </span>
             )}
@@ -139,49 +137,50 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => setNotifOpen(true)}
-                className="relative inline-flex items-center rounded-full p-2.5 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                className="relative inline-flex items-center rounded-full p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
                 aria-label="การแจ้งเตือน"
               >
-                <BellIcon className="h-6 w-6" />
+                <BellIcon className="h-5 w-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
               </button>
               <Link
                 href="/profile"
-                className="inline-flex items-center gap-2.5 rounded-full px-4 py-2.5 text-[15px] font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
                   {user.firstName?.charAt(0) ?? "U"}
                 </div>
-                {user.firstName}
+                <span className="hidden 2xl:inline">{user.firstName}</span>
               </Link>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-[15px] font-semibold text-white transition hover:bg-red-600"
+                className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
               >
-                <ArrowLeftOnRectangleIcon className="h-5 w-5" />
-                ออกจากระบบ
+                <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+                <span className="hidden 2xl:inline">ออกจากระบบ</span>
+                <span className="2xl:hidden">ออก</span>
               </button>
             </>
           ) : (
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-[15px] font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-700"
             >
-              <ArrowRightOnRectangleIcon className="h-5 w-5" />
+              <ArrowRightOnRectangleIcon className="h-4 w-4" />
               เข้าสู่ระบบ
             </Link>
           )}
         </div>
 
-        {/* Mobile hamburger */}
+        {/* Mobile / tablet hamburger */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-xl border border-slate-200 p-2.5 text-slate-600 transition hover:bg-slate-100 lg:hidden"
+          className="inline-flex items-center justify-center rounded-xl border border-slate-200 p-2.5 text-slate-600 transition hover:bg-slate-100 xl:hidden"
           onClick={() => setOpenMenu((prev) => !prev)}
           aria-label="เปิดปิดเมนู"
           aria-expanded={openMenu}
@@ -192,7 +191,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {openMenu && (
-        <nav className="animate-fade-in border-t border-slate-100 bg-white px-4 pb-5 pt-3 lg:hidden">
+        <nav className="animate-fade-in border-t border-slate-100 bg-white px-4 pb-5 pt-3 xl:hidden">
           <div className="flex flex-col gap-1">
             {navItems.map((item) => {
               const Icon = item.icon;

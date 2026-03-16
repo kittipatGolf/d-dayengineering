@@ -1,6 +1,11 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  TagIcon,
+  WrenchScrewdriverIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
 import defaultColors from "@/mocks/data/default-colors.json";
 import { productCategoriesService } from "@/lib/services/product-categories.service";
 import { ProductCategoriesTable } from "./component/product-categories-table";
@@ -184,18 +189,33 @@ export default function ProductCategoriesPage() {
       </header>
 
       <section className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-          <p className="text-sm font-medium text-slate-500">ประเภททั้งหมด</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{categories.length}</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-          <p className="text-sm font-medium text-slate-500">ประเภทประตูม้วน</p>
-          <p className="mt-2 text-2xl font-bold text-blue-600">{totalDoor}</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-          <p className="text-sm font-medium text-slate-500">ประเภทอะไหล่</p>
-          <p className="mt-2 text-2xl font-bold text-emerald-600">{totalParts}</p>
-        </div>
+        {([
+          { label: "ประเภททั้งหมด", value: categories.length, icon: TagIcon, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100", accent: "bg-blue-600" },
+          { label: "ประเภทประตูม้วน", value: totalDoor, icon: WrenchScrewdriverIcon, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100", accent: "bg-indigo-500" },
+          { label: "ประเภทอะไหล่", value: totalParts, icon: Cog6ToothIcon, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100", accent: "bg-emerald-500" },
+        ] as const).map((card) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.label}
+              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className={`absolute left-0 top-0 h-full w-1 ${card.accent}`} />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-500">{card.label}</p>
+                  <p className={`mt-1.5 text-3xl font-bold tracking-tight ${card.color}`}>
+                    {card.value.toLocaleString("th-TH")}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">รายการ</p>
+                </div>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.bg} ${card.border} border`}>
+                  <Icon className={`h-6 w-6 ${card.color}`} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </section>
 
       <section>

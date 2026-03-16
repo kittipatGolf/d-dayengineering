@@ -29,18 +29,18 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
       title="แก้ไขข้อมูลผู้ใช้"
       maxWidthClassName="max-w-md"
       footer={
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
             ยกเลิก
           </button>
           <button
             type="button"
             onClick={onSubmit}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
           >
             บันทึก
           </button>

@@ -245,15 +245,24 @@ export default function CartPage() {
   return (
     <>
       <div className="mx-auto max-w-5xl px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="flex items-center gap-2.5 text-2xl font-bold text-slate-800">
-            <ShoppingCartIcon className="h-7 w-7" />
-            ตะกร้าสินค้า
-          </h1>
-          <span className="rounded-full bg-blue-50 px-3.5 py-1 text-sm font-semibold text-blue-700">
-            {items.length} รายการ
-          </span>
+        {/* Hero header */}
+        <div className="relative mb-8 overflow-hidden rounded-2xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-6 py-8 text-white shadow-lg">
+          <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl" />
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+                <ShoppingCartIcon className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">ตะกร้าสินค้า</h1>
+                <p className="mt-0.5 text-sm text-blue-200/80">ตรวจสอบรายการและดำเนินการสั่งซื้อ</p>
+              </div>
+            </div>
+            <span className="rounded-full bg-white/15 px-4 py-1.5 text-sm font-semibold backdrop-blur-sm">
+              {items.length} รายการ
+            </span>
+          </div>
         </div>
 
         {/* Cart items */}
