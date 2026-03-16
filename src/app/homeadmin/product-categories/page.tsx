@@ -38,6 +38,7 @@ export default function ProductCategoriesPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     productCategoriesService.getAll().then((cats) => {
@@ -45,7 +46,7 @@ export default function ProductCategoriesPage() {
         ...c,
         updatedAt: c.updatedAt ? formatThaiDate(new Date(c.updatedAt)) : formatThaiDate(),
       })));
-    }).catch(() => setCategories([]));
+    }).catch(() => setCategories([])).finally(() => setLoading(false));
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -188,49 +189,57 @@ export default function ProductCategoriesPage() {
         </div>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-3">
-        {([
-          { label: "ประเภททั้งหมด", value: categories.length, icon: TagIcon, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100", accent: "bg-blue-600" },
-          { label: "ประเภทประตูม้วน", value: totalDoor, icon: WrenchScrewdriverIcon, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100", accent: "bg-indigo-500" },
-          { label: "ประเภทอะไหล่", value: totalParts, icon: Cog6ToothIcon, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100", accent: "bg-emerald-500" },
-        ] as const).map((card) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={card.label}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className={`absolute left-0 top-0 h-full w-1 ${card.accent}`} />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-500">{card.label}</p>
-                  <p className={`mt-1.5 text-3xl font-bold tracking-tight ${card.color}`}>
-                    {card.value.toLocaleString("th-TH")}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">รายการ</p>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+        </div>
+      ) : (
+        <>
+          <section className="grid gap-4 sm:grid-cols-3">
+            {([
+              { label: "ประเภททั้งหมด", value: categories.length, icon: TagIcon, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100", accent: "bg-blue-600" },
+              { label: "ประเภทประตูม้วน", value: totalDoor, icon: WrenchScrewdriverIcon, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100", accent: "bg-indigo-500" },
+              { label: "ประเภทอะไหล่", value: totalParts, icon: Cog6ToothIcon, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100", accent: "bg-emerald-500" },
+            ] as const).map((card) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={card.label}
+                  className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className={`absolute left-0 top-0 h-full w-1 ${card.accent}`} />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-500">{card.label}</p>
+                      <p className={`mt-1.5 text-3xl font-bold tracking-tight ${card.color}`}>
+                        {card.value.toLocaleString("th-TH")}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">รายการ</p>
+                    </div>
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.bg} ${card.border} border`}>
+                      <Icon className={`h-6 w-6 ${card.color}`} />
+                    </div>
+                  </div>
                 </div>
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.bg} ${card.border} border`}>
-                  <Icon className={`h-6 w-6 ${card.color}`} />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </section>
+              );
+            })}
+          </section>
 
-      <section>
-        <ProductCategoriesTable
-          rows={filteredRows}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onToggleStatus={toggleCategoryStatus}
-          onAddNew={openCreateModal}
-          onEdit={editCategory}
-          onDelete={requestDeleteCategory}
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-        />
-      </section>
+          <section>
+            <ProductCategoriesTable
+              rows={filteredRows}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onToggleStatus={toggleCategoryStatus}
+              onAddNew={openCreateModal}
+              onEdit={editCategory}
+              onDelete={requestDeleteCategory}
+              keyword={keyword}
+              onKeywordChange={setKeyword}
+            />
+          </section>
+        </>
+      )}
 
       {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
       <AlertModal open={!!alertMsg} message={alertMsg ?? ""} onClose={() => setAlertMsg(null)} />

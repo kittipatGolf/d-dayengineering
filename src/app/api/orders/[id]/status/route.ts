@@ -2,15 +2,19 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/session";
 import { createUserNotification } from "@/lib/notifications";
+import { validateEnum } from "@/lib/api-validation";
 
 type Params = { params: Promise<{ id: string }> };
 
+const VALID_STATUSES = ["รอการยืนยัน", "ได้รับการยืนยัน", "สำเร็จ", "ยกเลิก", "ไม่สำเร็จ"];
 const TERMINAL_STATUSES = ["สำเร็จ", "ยกเลิก"];
 
 export async function PUT(request: NextRequest, { params }: Params) {
   try { await requireAdmin(); } catch (res) { return res as NextResponse; }
   const { id } = await params;
   const { status } = await request.json();
+  const v = validateEnum(status, VALID_STATUSES);
+  if (!v.valid) return NextResponse.json({ error: v.error }, { status: 400 });
 
   const order = await prisma.order.update({
     where: { id },
@@ -25,7 +29,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       "อัปเดตสถานะคำสั่งซื้อ",
       `คำสั่งซื้อของคุณถูกเปลี่ยนเป็น "${status}"`,
       `/profile`,
-    ).catch(() => {});
+    ).catch((err) => console.error("Failed to send user notification for order status update:", err));
   }
 
   if (TERMINAL_STATUSES.includes(status)) {

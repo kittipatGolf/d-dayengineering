@@ -16,7 +16,7 @@ export function ProductImageCarousel({ images, alt, emptySlot }: ProductImageCar
     return <>{emptySlot}</>;
   }
 
-  const hasMulitple = images.length > 1;
+  const hasMultiple = images.length > 1;
 
   const prev = () => setIndex((i) => (i - 1 + images.length) % images.length);
   const next = () => setIndex((i) => (i + 1) % images.length);
@@ -35,7 +35,7 @@ export function ProductImageCarousel({ images, alt, emptySlot }: ProductImageCar
         {/* Gradient overlay bottom */}
         <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-black/30 to-transparent" />
 
-        {hasMulitple && (
+        {hasMultiple && (
           <>
             {/* Prev / Next */}
             <button
@@ -79,7 +79,7 @@ export function ProductImageCarousel({ images, alt, emptySlot }: ProductImageCar
       </div>
 
       {/* Thumbnail strip */}
-      {hasMulitple && (
+      {hasMultiple && (
         <div className="flex gap-1.5 overflow-x-auto bg-slate-50 p-2.5">
           {images.map((src, i) => (
             <button

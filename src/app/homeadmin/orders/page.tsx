@@ -32,17 +32,19 @@ export default function OrdersPage() {
   const [selectedOrderForQuote, setSelectedOrderForQuote] = useState<OrderRecord | null>(null);
   const [doorCategories, setDoorCategories] = useState<ProductCategory[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    ordersService
-      .getAll()
-      .then((rows) => setOrders(rows.filter((item) => isActiveOrderStatus(item.status))))
-      .catch(() => setOrders([]));
-
-    productCategoriesService
-      .getAll()
-      .then((rows) => setDoorCategories(rows.filter((item) => item.kind === "ประตูม้วน")))
-      .catch(() => setDoorCategories([]));
+    Promise.all([
+      ordersService
+        .getAll()
+        .then((rows) => setOrders(rows.filter((item) => isActiveOrderStatus(item.status))))
+        .catch(() => setOrders([])),
+      productCategoriesService
+        .getAll()
+        .then((rows) => setDoorCategories(rows.filter((item) => item.kind === "ประตูม้วน")))
+        .catch(() => setDoorCategories([])),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -115,17 +117,23 @@ export default function OrdersPage() {
         </div>
       </header>
 
-      <OrdersTable
-        rows={filteredRows}
-        activeTab={tab}
-        onTabChange={setTab}
-        keyword={keyword}
-        onKeywordChange={setKeyword}
-        onOpenAddress={openAddress}
-        onOpenItems={openItems}
-        onOpenSummary={openSummary}
-        onChangeStatus={changeStatus}
-      />
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+        </div>
+      ) : (
+        <OrdersTable
+          rows={filteredRows}
+          activeTab={tab}
+          onTabChange={setTab}
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onOpenAddress={openAddress}
+          onOpenItems={openItems}
+          onOpenSummary={openSummary}
+          onChangeStatus={changeStatus}
+        />
+      )}
 
       <HistoryAddressModal
         open={addressModalOpen}

@@ -115,8 +115,8 @@ function ProfilePageContent() {
         const data = await repairsRes.json();
         setRepairs(Array.isArray(data) ? data : data.repairRequests ?? []);
       }
-    } catch {
-      // silently fail — data stays empty
+    } catch (err) {
+      console.error("Failed to fetch profile data:", err);
     } finally {
       setLoading(false);
     }
@@ -228,8 +228,8 @@ function ProfilePageContent() {
         fetchData();
         setToast("ลบที่อยู่สำเร็จ");
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error("Failed to delete address:", err);
     }
   };
 

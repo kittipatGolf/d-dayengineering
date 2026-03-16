@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(rows);
     }
 
-    const y = yearParam ? parseInt(yearParam) : new Date().getFullYear();
+    const y = yearParam ? (parseInt(yearParam) || new Date().getFullYear()) : new Date().getFullYear();
     const rows = await prisma.$queryRaw<{ month: number; total: number }[]>`
       SELECT EXTRACT(MONTH FROM "createdAt")::int AS month,
              COALESCE(SUM("totalAmount"), 0)::float AS total
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(rows);
     }
 
-    const y = yearParam ? parseInt(yearParam) : new Date().getFullYear();
+    const y = yearParam ? (parseInt(yearParam) || new Date().getFullYear()) : new Date().getFullYear();
     const rows = await prisma.$queryRaw<{ month: number; total: number }[]>`
       SELECT EXTRACT(MONTH FROM "createdAt")::int AS month,
              COALESCE(SUM("repairPrice"), 0)::float AS total
@@ -120,12 +120,12 @@ export async function GET(request: NextRequest) {
     }
 
     const yearParam = request.nextUrl.searchParams.get("year");
-    const y = yearParam ? parseInt(yearParam) : new Date().getFullYear();
+    const y = yearParam ? (parseInt(yearParam) || new Date().getFullYear()) : new Date().getFullYear();
     const period = request.nextUrl.searchParams.get("period") ?? "month";
 
     if (period === "day") {
       const monthParam = request.nextUrl.searchParams.get("month");
-      const m = monthParam ? parseInt(monthParam) : new Date().getMonth() + 1;
+      const m = monthParam ? (parseInt(monthParam) || new Date().getMonth() + 1) : new Date().getMonth() + 1;
 
       const [orders, repairs] = await Promise.all([
         prisma.$queryRaw<{ day: number; total: number }[]>`

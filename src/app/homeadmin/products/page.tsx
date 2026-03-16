@@ -49,24 +49,26 @@ export default function ProductsPage() {
   const [keyword, setKeyword] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    productCategoriesService
-      .getAll()
-      .then((data) => {
-        const active = data.filter((item) => item.isActive);
-        setAllActiveCategories(active);
-        const firstDoorCategory = active.find((item) => item.kind === "ประตูม้วน");
-        setForm((prev) => ({ ...prev, categoryId: firstDoorCategory?.id ?? "" }));
-      })
-      .catch(() => setAllActiveCategories([]));
-
-    productsService.getAll().then((data) => {
-      setProducts(data.map((p) => ({
-        ...p,
-        updatedAt: p.updatedAt ? formatThaiDate(new Date(p.updatedAt)) : formatThaiDate(),
-      })));
-    }).catch(() => setProducts([]));
+    Promise.all([
+      productCategoriesService
+        .getAll()
+        .then((data) => {
+          const active = data.filter((item) => item.isActive);
+          setAllActiveCategories(active);
+          const firstDoorCategory = active.find((item) => item.kind === "ประตูม้วน");
+          setForm((prev) => ({ ...prev, categoryId: firstDoorCategory?.id ?? "" }));
+        })
+        .catch(() => setAllActiveCategories([])),
+      productsService.getAll().then((data) => {
+        setProducts(data.map((p) => ({
+          ...p,
+          updatedAt: p.updatedAt ? formatThaiDate(new Date(p.updatedAt)) : formatThaiDate(),
+        })));
+      }).catch(() => setProducts([])),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const categoryOptions = useMemo(
@@ -231,17 +233,23 @@ export default function ProductsPage() {
       <ProductStats total={products.length} selling={sellingCount} />
 
       <section>
-        <ProductsTable
-          rows={filteredProducts}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onToggleStatus={toggleProductStatus}
-          onEdit={editProduct}
-          onAddNew={openCreateModal}
-          toCurrency={toCurrency}
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+          </div>
+        ) : (
+          <ProductsTable
+            rows={filteredProducts}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onToggleStatus={toggleProductStatus}
+            onEdit={editProduct}
+            onAddNew={openCreateModal}
+            toCurrency={toCurrency}
+            keyword={keyword}
+            onKeywordChange={setKeyword}
+          />
+        )}
       </section>
 
       {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}

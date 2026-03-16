@@ -38,7 +38,8 @@ export async function DELETE(
     await prisma.address.delete({ where: { id } });
 
     return NextResponse.json({ message: "ลบที่อยู่สำเร็จ" });
-  } catch {
+  } catch (err) {
+    console.error("DELETE /api/me/addresses/[id] error:", err);
     return NextResponse.json(
       { error: "เกิดข้อผิดพลาดในการลบที่อยู่" },
       { status: 500 }

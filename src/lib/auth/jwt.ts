@@ -5,11 +5,15 @@ export type AccessTokenPayload = { userId: string; role: string };
 export type RefreshTokenPayload = { userId: string; tokenId: string };
 
 function getAccessSecret() {
-  return new TextEncoder().encode(process.env.JWT_SECRET!);
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET environment variable is not set");
+  return new TextEncoder().encode(secret);
 }
 
 function getRefreshSecret() {
-  return new TextEncoder().encode(process.env.JWT_REFRESH_SECRET!);
+  const secret = process.env.JWT_REFRESH_SECRET;
+  if (!secret) throw new Error("JWT_REFRESH_SECRET environment variable is not set");
+  return new TextEncoder().encode(secret);
 }
 
 const ISSUER = "d-day-engineering";

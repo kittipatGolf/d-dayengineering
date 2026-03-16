@@ -43,11 +43,11 @@ export default function PartsPage() {
       fetch("/api/products")
         .then((r) => r.json())
         .then((data: ProductItem[]) => setProducts(data.filter((p) => p.kind === "อะไหล่" && p.status === "วางขาย")))
-        .catch(() => {}),
+        .catch((err) => console.error("Failed to fetch products:", err)),
       fetch("/api/product-categories")
         .then((r) => r.json())
         .then((data: ProductCategory[]) => setCategories(data.filter((c) => c.kind === "อะไหล่" && c.isActive)))
-        .catch(() => {}),
+        .catch((err) => console.error("Failed to fetch product categories:", err)),
     ]).finally(() => setLoading(false));
   }, []);
 

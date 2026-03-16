@@ -37,7 +37,8 @@ export async function PUT(req: NextRequest) {
     });
 
     return NextResponse.json(user);
-  } catch {
+  } catch (err) {
+    console.error("PUT /api/me/profile error:", err);
     return NextResponse.json(
       { error: "เกิดข้อผิดพลาดในการอัปเดตข้อมูลผู้ใช้" },
       { status: 500 }

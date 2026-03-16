@@ -18,7 +18,8 @@ export async function GET() {
     });
 
     return NextResponse.json(requests);
-  } catch {
+  } catch (err) {
+    console.error("GET /api/repair-requests/my error:", err);
     return NextResponse.json(
       { error: "เกิดข้อผิดพลาดในการดึงข้อมูลคำขอซ่อม" },
       { status: 500 }

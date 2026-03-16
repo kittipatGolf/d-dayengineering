@@ -19,7 +19,8 @@ export async function GET() {
     });
 
     return NextResponse.json(orders);
-  } catch {
+  } catch (err) {
+    console.error("GET /api/orders/my error:", err);
     return NextResponse.json(
       { error: "เกิดข้อผิดพลาดในการดึงข้อมูลคำสั่งซื้อ" },
       { status: 500 }

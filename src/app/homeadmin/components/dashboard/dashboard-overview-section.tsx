@@ -25,7 +25,7 @@ export function DashboardOverviewSection() {
     fetch("/api/dashboard?type=stats")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => { if (data) setStats(data); })
-      .catch(() => {});
+      .catch((err) => console.error("Failed to fetch dashboard stats:", err));
   }, []);
 
   const s = stats;

@@ -38,23 +38,25 @@ export default function DoorPricingPage() {
   const [form, setForm] = useState<DoorPricingFormState>(emptyDoorPricingForm(""));
   const [keyword, setKeyword] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    productCategoriesService
-      .getAll()
-      .then((all) => {
-        const doors = all.filter((item) => item.kind === "ประตูม้วน" && item.isActive);
-        setDoorCategories(doors);
-        setForm((prev) => ({ ...prev, categoryId: doors[0]?.id ?? "" }));
-      })
-      .catch(() => setDoorCategories([]));
-
-    doorPricingService.getAll().then((data) => {
-      setRows(data.map((r) => ({
-        ...r,
-        updatedAt: r.updatedAt ? formatThaiDate(new Date(r.updatedAt)) : formatThaiDate(),
-      })));
-    }).catch(() => setRows([]));
+    Promise.all([
+      productCategoriesService
+        .getAll()
+        .then((all) => {
+          const doors = all.filter((item) => item.kind === "ประตูม้วน" && item.isActive);
+          setDoorCategories(doors);
+          setForm((prev) => ({ ...prev, categoryId: doors[0]?.id ?? "" }));
+        })
+        .catch(() => setDoorCategories([])),
+      doorPricingService.getAll().then((data) => {
+        setRows(data.map((r) => ({
+          ...r,
+          updatedAt: r.updatedAt ? formatThaiDate(new Date(r.updatedAt)) : formatThaiDate(),
+        })));
+      }).catch(() => setRows([])),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const filterOptions = useMemo(
@@ -169,17 +171,23 @@ export default function DoorPricingPage() {
       </header>
 
       <section>
-        <DoorPricingTable
-          rows={filteredRows}
-          filterValue={filterValue}
-          filterOptions={filterOptions}
-          onFilterChange={setFilterValue}
-          onAdd={openCreate}
-          onEdit={openEdit}
-          onDelete={onDelete}
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+          </div>
+        ) : (
+          <DoorPricingTable
+            rows={filteredRows}
+            filterValue={filterValue}
+            filterOptions={filterOptions}
+            onFilterChange={setFilterValue}
+            onAdd={openCreate}
+            onEdit={openEdit}
+            onDelete={onDelete}
+            keyword={keyword}
+            onKeywordChange={setKeyword}
+          />
+        )}
       </section>
 
       {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}

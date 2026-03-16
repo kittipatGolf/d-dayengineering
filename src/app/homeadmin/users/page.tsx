@@ -55,9 +55,10 @@ export default function UsersPage() {
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [addressForm, setAddressForm] = useState<AddressEditState>(EMPTY_ADDRESS_EDIT_STATE);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    usersService.getAll().then(setUsers).catch(() => setUsers([]));
+    usersService.getAll().then(setUsers).catch(() => setUsers([])).finally(() => setLoading(false));
   }, []);
 
   const filteredUsers = useMemo(() => {
@@ -179,14 +180,20 @@ export default function UsersPage() {
         </div>
       </header>
 
-      <UsersTable
-        rows={filteredUsers}
-        keyword={keyword}
-        onKeywordChange={setKeyword}
-        onViewAddresses={openAddressModal}
-        onEdit={openEditModal}
-        onDelete={deleteUser}
-      />
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+        </div>
+      ) : (
+        <UsersTable
+          rows={filteredUsers}
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onViewAddresses={openAddressModal}
+          onEdit={openEditModal}
+          onDelete={deleteUser}
+        />
+      )}
 
       <UserAddressesModal
         open={addressModalOpen}

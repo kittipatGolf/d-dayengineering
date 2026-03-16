@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession, requireAdmin } from "@/lib/auth/session";
 import { createAdminNotification } from "@/lib/notifications";
+import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
 import { type Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -14,6 +15,15 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const rl = checkRateLimit(`repair-requests:${ip}`, 10, 15 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "คำขอมากเกินไป กรุณารอสักครู่" },
+        { status: 429 },
+      );
+    }
+
     const session = await getSession();
     if (!session) {
       return NextResponse.json(
@@ -69,10 +79,11 @@ export async function POST(req: NextRequest) {
       "คำขอแจ้งซ่อมใหม่",
       `${user.username} แจ้งซ่อม${repairType} - ${repairItem}`,
       `/homeadmin/repairs`,
-    ).catch(() => {});
+    ).catch((err) => console.error("Failed to send admin notification for new repair request:", err));
 
     return NextResponse.json(repairRequest, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error("POST /api/repair-requests error:", err);
     return NextResponse.json(
       { error: "เกิดข้อผิดพลาดในการสร้างคำขอซ่อม" },
       { status: 500 }

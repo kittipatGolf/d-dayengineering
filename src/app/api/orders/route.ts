@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession, requireAdmin } from "@/lib/auth/session";
 import { createAdminNotification } from "@/lib/notifications";
+import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
@@ -14,6 +15,15 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const rl = checkRateLimit(`orders:${ip}`, 10, 15 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "คำขอมากเกินไป กรุณารอสักครู่" },
+        { status: 429 },
+      );
+    }
+
     const session = await getSession();
     if (!session) {
       return NextResponse.json(
@@ -84,10 +94,11 @@ export async function POST(req: NextRequest) {
       "คำสั่งซื้อใหม่",
       `${firstName} ${lastName} สั่งซื้อสินค้า ฿${totalAmount.toLocaleString()}`,
       `/homeadmin/orders`,
-    ).catch(() => {});
+    ).catch((err) => console.error("Failed to send admin notification for new order:", err));
 
     return NextResponse.json(order, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error("POST /api/orders error:", err);
     return NextResponse.json(
       { error: "เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ" },
       { status: 500 }

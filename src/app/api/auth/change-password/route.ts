@@ -6,9 +6,19 @@ import { hashPassword, verifyPassword, validatePasswordStrength } from "@/lib/au
 import { signAccessToken, signRefreshToken } from "@/lib/auth/jwt";
 import { setAuthCookies } from "@/lib/auth/cookies";
 import { REFRESH_TOKEN_EXPIRY_DAYS } from "@/lib/auth/constants";
+import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const rl = checkRateLimit(`change-password:${ip}`, 5, 15 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "พยายามเปลี่ยนรหัสผ่านมากเกินไป กรุณารอสักครู่" },
+      { status: 429 },
+    );
+  }
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

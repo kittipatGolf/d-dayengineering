@@ -17,7 +17,8 @@ export async function GET() {
     });
 
     return NextResponse.json(addresses);
-  } catch {
+  } catch (err) {
+    console.error("GET /api/me/addresses error:", err);
     return NextResponse.json(
       { error: "เกิดข้อผิดพลาดในการดึงข้อมูลที่อยู่" },
       { status: 500 }
@@ -57,7 +58,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(address, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error("POST /api/me/addresses error:", err);
     return NextResponse.json(
       { error: "เกิดข้อผิดพลาดในการเพิ่มที่อยู่" },
       { status: 500 }

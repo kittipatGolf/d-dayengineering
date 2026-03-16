@@ -16,9 +16,10 @@ export default function PortfolioPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<PortfolioFormState>(emptyPortfolioForm);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    portfolioService.getAll().then(setItems).catch(() => setItems([]));
+    portfolioService.getAll().then(setItems).catch(() => setItems([])).finally(() => setLoading(false));
   }, []);
 
   const filteredItems = useMemo(() => {
@@ -94,20 +95,28 @@ export default function PortfolioPage() {
 
       <PortfolioToolbar query={query} onQueryChange={setQuery} onAdd={openCreate} />
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filteredItems.map((item) => (
-          <PortfolioCard
-            key={item.id}
-            item={item}
-            onEdit={openEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </section>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+        </div>
+      ) : (
+        <>
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredItems.map((item) => (
+              <PortfolioCard
+                key={item.id}
+                item={item}
+                onEdit={openEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </section>
 
-      <div className="mt-5 text-sm text-slate-500">
-        Showing 1 - {filteredItems.length} of {filteredItems.length}
-      </div>
+          <div className="mt-5 text-sm text-slate-500">
+            Showing 1 - {filteredItems.length} of {filteredItems.length}
+          </div>
+        </>
+      )}
 
       {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
 

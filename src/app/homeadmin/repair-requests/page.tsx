@@ -28,19 +28,21 @@ export default function RepairRequestsPage() {
   const [repairPriceInput, setRepairPriceInput] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [parts, setParts] = useState<{ id: string; name: string; price: number | null }[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    repairRequestsService
-      .getAll()
-      .then((items) => setRows(items.filter((item) => isActiveStatus(item.status))))
-      .catch(() => setRows([]));
-
-    fetch("/api/products")
-      .then((r) => r.json())
-      .then((products: { id: string; name: string; kind: string; price: number | null }[]) =>
-        setParts(products.filter((p) => p.kind === "อะไหล่").map((p) => ({ id: p.id, name: p.name, price: p.price }))),
-      )
-      .catch(() => {});
+    Promise.all([
+      repairRequestsService
+        .getAll()
+        .then((items) => setRows(items.filter((item) => isActiveStatus(item.status))))
+        .catch((err) => { console.error("Failed to fetch repair requests:", err); setRows([]); }),
+      fetch("/api/products")
+        .then((r) => r.json())
+        .then((products: { id: string; name: string; kind: string; price: number | null }[]) =>
+          setParts(products.filter((p) => p.kind === "อะไหล่").map((p) => ({ id: p.id, name: p.name, price: p.price }))),
+        )
+        .catch((err) => console.error("Failed to fetch parts:", err)),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -103,8 +105,8 @@ export default function RepairRequestsPage() {
       const updated = await repairRequestsService.updateFields(id, { selectedPart: partName });
       setRows((prev) => prev.map((item) => (item.id === id ? { ...item, ...updated } : item)));
       setToast("เลือกอะไหล่สำเร็จ");
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error("Failed to select part:", err);
     }
   };
 
@@ -136,18 +138,24 @@ export default function RepairRequestsPage() {
         </div>
       </header>
 
-      <RepairRequestsTable
-        rows={filteredRows}
-        parts={parts}
-        activeTab={tab}
-        onTabChange={setTab}
-        keyword={keyword}
-        onKeywordChange={setKeyword}
-        onOpenAddress={openAddress}
-        onChangeStatus={onChangeStatus}
-        onSelectPart={onSelectPart}
-        onEditInitialPrice={openInitialPriceModal}
-      />
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+        </div>
+      ) : (
+        <RepairRequestsTable
+          rows={filteredRows}
+          parts={parts}
+          activeTab={tab}
+          onTabChange={setTab}
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onOpenAddress={openAddress}
+          onChangeStatus={onChangeStatus}
+          onSelectPart={onSelectPart}
+          onEditInitialPrice={openInitialPriceModal}
+        />
+      )}
 
       <HistoryAddressModal
         open={addressModalOpen}

@@ -51,12 +51,12 @@ export default function DoorsPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/door-pricing").then((r) => r.json()).then(setPricingRows).catch(() => {}),
-      fetch("/api/product-categories").then((r) => r.json()).then(setProductCategories).catch(() => {}),
+      fetch("/api/door-pricing").then((r) => r.json()).then(setPricingRows).catch((err) => console.error("Failed to fetch door pricing:", err)),
+      fetch("/api/product-categories").then((r) => r.json()).then(setProductCategories).catch((err) => console.error("Failed to fetch product categories:", err)),
       fetch("/api/products")
         .then((r) => r.json())
         .then((data: ProductItem[]) => setProducts(data.filter((p) => p.kind === "ประตูม้วน" && p.status === "วางขาย")))
-        .catch(() => {}),
+        .catch((err) => console.error("Failed to fetch products:", err)),
     ]).finally(() => setLoading(false));
   }, []);
 

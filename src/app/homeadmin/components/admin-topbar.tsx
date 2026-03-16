@@ -34,7 +34,7 @@ export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
     fetch("/api/notifications?target=admin")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => { if (data) setUnreadCount(data.unreadCount); })
-      .catch(() => {});
+      .catch((err) => console.error("Failed to fetch admin notifications:", err));
   }, []);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
       fetch("/api/notifications?target=admin")
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => { if (data) setUnreadCount(data.unreadCount); })
-        .catch(() => {});
+        .catch((err) => console.error("Failed to fetch admin notifications:", err));
     }, 30000);
     return () => clearInterval(interval);
   }, []);

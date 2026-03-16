@@ -31,10 +31,13 @@ export default function HistoryPage() {
   const [selectedAddress, setSelectedAddress] = useState<HistoryAddress | null>(null);
   const [itemsModalOpen, setItemsModalOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<ProductHistoryLineItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    historyService.getRepairHistory().then(setRepairRows).catch(() => setRepairRows([]));
-    historyService.getProductHistory().then(setProductRows).catch(() => setProductRows([]));
+    Promise.all([
+      historyService.getRepairHistory().then(setRepairRows).catch(() => setRepairRows([])),
+      historyService.getProductHistory().then(setProductRows).catch(() => setProductRows([])),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const filteredRepairRows = useMemo(() => {
@@ -100,55 +103,63 @@ export default function HistoryPage() {
         </div>
       </header>
 
-      <HistorySummaryCards total={activeRowsCount} completed={completedCount} canceled={canceledCount} />
-
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        {/* toolbar: tabs + search */}
-        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/60 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <FilterTabs
-            options={["ประวัติแจ้งซ่อม", "ประวัติสินค้า"] as const}
-            value={tab}
-            onChange={setTab}
-            className=""
-          />
-          <label className="relative block w-full sm:max-w-56">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              placeholder={tab === "ประวัติแจ้งซ่อม" ? "ค้นหาประวัติแจ้งซ่อม..." : "ค้นหาประวัติสินค้า..."}
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-            />
-          </label>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
         </div>
+      ) : (
+        <>
+          <HistorySummaryCards total={activeRowsCount} completed={completedCount} canceled={canceledCount} />
 
-        {/* status filter */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 px-5 py-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">สถานะ</span>
-          <FilterTabs
-            options={["ทั้งหมด", "สำเร็จ", "ยกเลิก"] as const}
-            value={tab === "ประวัติแจ้งซ่อม" ? repairStatusFilter : productStatusFilter}
-            onChange={(value) => {
-              if (tab === "ประวัติแจ้งซ่อม") {
-                setRepairStatusFilter(value);
-              } else {
-                setProductStatusFilter(value);
-              }
-            }}
-            className=""
-          />
-        </div>
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            {/* toolbar: tabs + search */}
+            <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/60 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <FilterTabs
+                options={["ประวัติแจ้งซ่อม", "ประวัติสินค้า"] as const}
+                value={tab}
+                onChange={setTab}
+                className=""
+              />
+              <label className="relative block w-full sm:max-w-56">
+                <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  placeholder={tab === "ประวัติแจ้งซ่อม" ? "ค้นหาประวัติแจ้งซ่อม..." : "ค้นหาประวัติสินค้า..."}
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                />
+              </label>
+            </div>
 
-        {tab === "ประวัติแจ้งซ่อม" ? (
-          <HistoryRepairsTable rows={filteredRepairRows} onOpenAddress={openRepairAddress} />
-        ) : (
-          <HistoryProductsTable
-            rows={filteredProductRows}
-            onOpenAddress={openProductAddress}
-            onOpenItems={openProductItems}
-          />
-        )}
-      </div>
+            {/* status filter */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 px-5 py-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">สถานะ</span>
+              <FilterTabs
+                options={["ทั้งหมด", "สำเร็จ", "ยกเลิก"] as const}
+                value={tab === "ประวัติแจ้งซ่อม" ? repairStatusFilter : productStatusFilter}
+                onChange={(value) => {
+                  if (tab === "ประวัติแจ้งซ่อม") {
+                    setRepairStatusFilter(value);
+                  } else {
+                    setProductStatusFilter(value);
+                  }
+                }}
+                className=""
+              />
+            </div>
+
+            {tab === "ประวัติแจ้งซ่อม" ? (
+              <HistoryRepairsTable rows={filteredRepairRows} onOpenAddress={openRepairAddress} />
+            ) : (
+              <HistoryProductsTable
+                rows={filteredProductRows}
+                onOpenAddress={openProductAddress}
+                onOpenItems={openProductItems}
+              />
+            )}
+          </div>
+        </>
+      )}
 
       <HistoryAddressModal
         open={addressModalOpen}

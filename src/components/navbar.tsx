@@ -59,7 +59,7 @@ export function Navbar() {
     fetch("/api/notifications?target=user")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => { if (data) setUnreadCount(data.unreadCount); })
-      .catch(() => {});
+      .catch((err) => console.error("Failed to fetch user notifications:", err));
   }, [user]);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export function Navbar() {
       fetch("/api/notifications?target=user")
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => { if (data) setUnreadCount(data.unreadCount); })
-        .catch(() => {});
+        .catch((err) => console.error("Failed to fetch user notifications:", err));
     }, 30000);
     return () => clearInterval(interval);
   }, [user]);

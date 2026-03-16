@@ -75,8 +75,8 @@ export default function CartPage() {
         const data = await res.json();
         setSavedAddresses(data);
       }
-    } catch {
-      /* ignore */
+    } catch (err) {
+      console.error("Failed to fetch saved addresses:", err);
     }
   }, []);
 
@@ -185,7 +185,8 @@ export default function CartPage() {
       setTimeout(() => {
         router.push("/profile?section=orders");
       }, 2000);
-    } catch {
+    } catch (err) {
+      console.error("Failed to submit order:", err);
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่");
     } finally {
       setSubmitting(false);
@@ -561,7 +562,7 @@ export default function CartPage() {
               </div>
 
               {error && (
-                <div className="rounded-xl bg-red-50 p-3.5 text-sm text-red-600">
+                <div role="alert" className="rounded-xl bg-red-50 p-3.5 text-sm text-red-600">
                   {error}
                 </div>
               )}

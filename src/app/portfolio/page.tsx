@@ -22,7 +22,7 @@ export default function PortfolioPage() {
     fetch("/api/portfolio")
       .then((r) => r.json())
       .then(setItems)
-      .catch(() => {})
+      .catch((err) => console.error("Failed to fetch portfolio items:", err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -57,7 +57,7 @@ export default function PortfolioPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
+        <div role="status" aria-label="กำลังโหลด" className="flex items-center justify-center py-20">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
         </div>
       ) : filtered.length === 0 ? (

@@ -66,16 +66,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchMe]);
 
   const login = useCallback(async (username: string, password: string): Promise<{ error?: string; user?: AuthUser }> => {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) return { error: data.error };
-    setUser(data.user);
-    setIsLoading(false);
-    return { user: data.user };
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { error: data.error };
+      setUser(data.user);
+      return { user: data.user };
+    } catch {
+      return { error: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้" };
+    }
   }, []);
 
   const logout = useCallback(async () => {

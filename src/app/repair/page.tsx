@@ -104,7 +104,7 @@ export default function RepairPage() {
     fetch("/api/me/addresses")
       .then((res) => (res.ok ? res.json() : []))
       .then((data: SavedAddress[]) => setSavedAddresses(data))
-      .catch(() => setSavedAddresses([]));
+      .catch((err) => { console.error("Failed to fetch saved addresses:", err); setSavedAddresses([]); });
   }, [user]);
 
   // Build address select options
@@ -171,7 +171,8 @@ export default function RepairPage() {
       }
 
       setSuccess(true);
-    } catch {
+    } catch (err) {
+      console.error("Failed to submit repair request:", err);
       setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
@@ -331,7 +332,7 @@ export default function RepairPage() {
             <ImageUploadField value={images} onChange={setImages} />
 
             {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                 {error}
               </div>
             )}

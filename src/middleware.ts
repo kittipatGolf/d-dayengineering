@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const ACCESS_TOKEN_COOKIE = "access_token";
+const ISSUER = "d-day-engineering";
+const AUDIENCE = "d-day-engineering";
 
 type TokenPayload = { userId: string; role: string };
 
 async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-    const { payload } = await jwtVerify(token, secret);
+    const secret = process.env.JWT_SECRET;
+    if (!secret) return null;
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(secret),
+      { issuer: ISSUER, audience: AUDIENCE },
+    );
     return payload as unknown as TokenPayload;
   } catch {
     return null;
@@ -33,7 +40,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Auth-required routes
-  if (pathname.startsWith("/profile")) {
+  if (pathname.startsWith("/profile") || pathname.startsWith("/cart") || pathname.startsWith("/repair")) {
     if (!payload) return redirect(request, "/login");
   }
 
@@ -48,5 +55,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/homeadmin/:path*", "/profile/:path*", "/login", "/register", "/requestreset"],
+  matcher: ["/homeadmin/:path*", "/profile/:path*", "/cart", "/repair", "/login", "/register", "/requestreset"],
 };
