@@ -41,9 +41,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
         completedAt: new Date().toLocaleDateString("th-TH"),
       },
     });
-
-    await prisma.order.delete({ where: { id } });
-    return NextResponse.json(null);
   }
 
   return NextResponse.json(order);

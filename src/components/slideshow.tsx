@@ -136,7 +136,7 @@ export function SlideShow() {
         {/* Nav arrows */}
         <button
           type="button"
-          className="absolute left-4 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-full bg-white/20 p-2.5 text-white backdrop-blur-sm transition hover:bg-white/30 md:left-5"
+          className="absolute left-4 top-1/2 z-20 inline-flex -translate-y-1/2 items-center justify-center rounded-full bg-white/20 p-2.5 text-white backdrop-blur-sm transition hover:bg-white/30 md:left-5"
           onClick={() => goTo((activeSlide - 1 + slides.length) % slides.length)}
           aria-label="สไลด์ก่อนหน้า"
         >
@@ -144,7 +144,7 @@ export function SlideShow() {
         </button>
         <button
           type="button"
-          className="absolute right-4 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-full bg-white/20 p-2.5 text-white backdrop-blur-sm transition hover:bg-white/30 md:right-5"
+          className="absolute right-4 top-1/2 z-20 inline-flex -translate-y-1/2 items-center justify-center rounded-full bg-white/20 p-2.5 text-white backdrop-blur-sm transition hover:bg-white/30 md:right-5"
           onClick={() => goTo((activeSlide + 1) % slides.length)}
           aria-label="สไลด์ถัดไป"
         >

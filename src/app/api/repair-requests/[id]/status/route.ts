@@ -44,9 +44,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
         price: repairRequest.repairPrice,
       },
     });
-
-    await prisma.repairRequest.delete({ where: { id } });
-    return NextResponse.json(null);
   }
 
   return NextResponse.json(repairRequest);

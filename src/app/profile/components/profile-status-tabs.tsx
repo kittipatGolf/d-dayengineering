@@ -15,8 +15,8 @@ type ProfileStatusTabsProps = {
 const tabs = [
   { key: "all", label: "ทั้งหมด", icon: ListBulletIcon },
   { key: "pending", label: "รอการยืนยัน", icon: ClockIcon },
-  { key: "confirmed", label: "ยืนยันแล้ว", icon: CheckCircleIcon },
-  { key: "completed", label: "เสร็จแล้ว", icon: CheckIcon },
+  { key: "confirmed", label: "ได้รับการยืนยัน", icon: CheckCircleIcon },
+  { key: "completed", label: "สำเร็จ", icon: CheckIcon },
   { key: "cancelled", label: "ยกเลิก", icon: XCircleIcon },
 ] as const;
 
