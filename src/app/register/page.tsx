@@ -56,6 +56,47 @@ const strengthConfig = [
   { class: "w-full bg-emerald-500", label: "ความปลอดภัยสูง", color: "text-emerald-500" },
 ];
 
+function InputField({
+  id,
+  label,
+  icon: Icon,
+  type = "text",
+  placeholder,
+  value,
+  onChange,
+  error,
+  inputMode,
+}: {
+  id: string;
+  label: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  type?: string;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+  inputMode?: "numeric" | "text" | "email" | "tel";
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700">
+        <Icon className="h-4 w-4 text-slate-400" />
+        {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        inputMode={inputMode}
+        onChange={(e) => onChange(e.target.value)}
+        className={`w-full rounded-xl border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 ${error ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"}`}
+      />
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+    </div>
+  );
+}
+
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -136,47 +177,6 @@ export default function RegisterPage() {
       setApiError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
       setIsSubmitting(false);
     }
-  }
-
-  function InputField({
-    id,
-    label,
-    icon: Icon,
-    type = "text",
-    placeholder,
-    value,
-    onChange,
-    error,
-    inputMode,
-  }: {
-    id: keyof RegisterForm;
-    label: string;
-    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-    type?: string;
-    placeholder: string;
-    value: string;
-    onChange: (v: string) => void;
-    error?: string;
-    inputMode?: "numeric" | "text" | "email" | "tel";
-  }) {
-    return (
-      <div>
-        <label htmlFor={id} className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700">
-          <Icon className="h-4 w-4 text-slate-400" />
-          {label}
-        </label>
-        <input
-          id={id}
-          type={type}
-          placeholder={placeholder}
-          value={value}
-          inputMode={inputMode}
-          onChange={(e) => onChange(e.target.value)}
-          className={`w-full rounded-xl border bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:bg-white focus:ring-2 ${error ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"}`}
-        />
-        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-      </div>
-    );
   }
 
   return (
