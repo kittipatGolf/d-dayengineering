@@ -19,6 +19,7 @@ export type ThaiAddressValue = {
 type ThaiAddressInputProps = {
   value: ThaiAddressValue;
   onChange: (value: ThaiAddressValue) => void;
+  disabled?: boolean;
   inputClassName?: string;
   labelClassName?: string;
 };
@@ -138,6 +139,7 @@ function FilterableSelect({
 export function ThaiAddressInput({
   value,
   onChange,
+  disabled = false,
   inputClassName: _inputClassName,
   labelClassName = "mb-1.5 block text-sm font-medium text-slate-700",
 }: ThaiAddressInputProps) {
@@ -177,6 +179,7 @@ export function ThaiAddressInput({
         value={value.province}
         onSelect={handleProvinceSelect}
         labelClassName={labelClassName}
+        disabled={disabled}
       />
       <FilterableSelect
         id="thai-district"
@@ -186,7 +189,7 @@ export function ThaiAddressInput({
         value={value.district}
         onSelect={handleDistrictSelect}
         labelClassName={labelClassName}
-        disabled={!value.province}
+        disabled={disabled || !value.province}
       />
       <FilterableSelect
         id="thai-subdistrict"
@@ -196,7 +199,7 @@ export function ThaiAddressInput({
         value={value.subdistrict}
         onSelect={handleSubdistrictSelect}
         labelClassName={labelClassName}
-        disabled={!value.district}
+        disabled={disabled || !value.district}
       />
       <div>
         <label htmlFor="thai-postalCode" className={labelClassName}>
@@ -206,10 +209,10 @@ export function ThaiAddressInput({
           id="thai-postalCode"
           type="text"
           readOnly
-          disabled={!value.subdistrict}
+          disabled={disabled || !value.subdistrict}
           value={value.postalCode}
           placeholder="เลือกตำบลเพื่อกรอกอัตโนมัติ"
-          className={`w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${!value.subdistrict ? "cursor-not-allowed bg-slate-100! text-slate-400!" : ""}`}
+          className={`w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${disabled || !value.subdistrict ? "cursor-not-allowed bg-slate-100! text-slate-400!" : ""}`}
         />
       </div>
     </>

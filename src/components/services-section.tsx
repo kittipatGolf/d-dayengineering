@@ -55,7 +55,7 @@ export function ServicesSection() {
           บริการของเรา
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-slate-500">
-          D-Day Engineering ให้บริการด้านประตูม้วนครบวงจร
+          ดีย์แปดประตูม้วน ให้บริการด้านประตูม้วนครบวงจร
           ทั้งจำหน่าย ติดตั้ง ซ่อมบำรุง และอะไหล่
         </p>
       </div>

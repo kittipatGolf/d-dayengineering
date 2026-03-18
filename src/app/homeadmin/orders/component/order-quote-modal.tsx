@@ -44,10 +44,10 @@ function buildPrintHtml(order: OrderRecord, subtotal: number, vat: number, grand
       <body>
         <div class="center">
           <div class="note">*หมายเหตุ: ราคาที่ปรากฏเป็นเพียงการประเมินราคาเบื้องต้น ซึ่งอาจมีการเปลี่ยนแปลงราคาในภายหลัง</div>
-          <div class="company">ห้างหุ้นส่วนจำกัด ดี เดย์ ประตูม้วน</div>
-          <div>422/63 หมู่ที่ 5 ตำบลเลขข่านทรง อำเภอครราชา จังหวัดชลบุรี 20110</div>
-          <div>โทร 083-015-1893, 086-033-5224</div>
-          <div>เลขประจำตัวผู้เสียภาษี 0203551006260</div>
+          <div class="company">บริษัท ดีย์แปด ประตูม้วน จำกัด</div>
+          <div>40/7 ม.2 ต.มาบยางพร อ.ปลวกแดง จ.ระยอง 21140</div>
+          <div>โทร 091-834-8666, 062-545-0777</div>
+          <div>เลขที่ผู้เสียภาษี 0215568001551</div>
           <h2>ใบประเมินราคาเบื้องต้น<br/>Preliminary Price Estimate</h2>
         </div>
 
@@ -137,10 +137,10 @@ export function OrderQuoteModal({ open, order, onClose }: OrderQuoteModalProps) 
           *หมายเหตุ: ราคาที่ปรากฏเป็นเพียงการประเมินราคาเบื้องต้น ซึ่งอาจมีการเปลี่ยนแปลงราคาในภายหลัง
         </p>
         <div className="text-center">
-          <h2 className="text-2xl font-bold">ห้างหุ้นส่วนจำกัด ดี เดย์ ประตูม้วน</h2>
-          <p className="text-sm">422/63 หมู่ที่ 5 ตำบลเลขข่านทรง อำเภอครราชา จังหวัดชลบุรี 20110</p>
-          <p className="text-sm">โทร 083-015-1893, 086-033-5224</p>
-          <p className="text-sm">เลขประจำตัวผู้เสียภาษี 0203551006260</p>
+          <h2 className="text-2xl font-bold">บริษัท ดีย์แปด ประตูม้วน จำกัด</h2>
+          <p className="text-sm">40/7 ม.2 ต.มาบยางพร อ.ปลวกแดง จ.ระยอง 21140</p>
+          <p className="text-sm">โทร 091-834-8666, 062-545-0777</p>
+          <p className="text-sm">เลขที่ผู้เสียภาษี 0215568001551</p>
           <p className="mt-3 text-2xl font-bold">ใบประเมินราคาเบื้องต้น</p>
           <p className="text-2xl font-bold">Preliminary Price Estimate</p>
         </div>

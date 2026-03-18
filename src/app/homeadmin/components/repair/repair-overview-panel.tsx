@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { ReportFilterControls } from "../report-filter-controls";
-import { getRecentYears } from "../year-options";
 
 const periods = [
   { value: "year", label: "รายปี" },
@@ -24,9 +23,21 @@ type ChartItem = {
 };
 
 export function RepairOverviewPanel() {
-  const years = useMemo(() => getRecentYears(5), []);
+  const [years, setYears] = useState<number[]>([new Date().getFullYear()]);
   const [period, setPeriod] = useState<PeriodValue>("month");
-  const [year, setYear] = useState<number>(years[0]);
+  const [year, setYear] = useState<number>(new Date().getFullYear());
+
+  useEffect(() => {
+    fetch("/api/dashboard?type=years")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: number[] | null) => {
+        if (data && data.length > 0) {
+          setYears(data);
+          setYear(data[0]);
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
   const [chartData, setChartData] = useState<ChartItem[]>([]);
   const [loading, setLoading] = useState(true);

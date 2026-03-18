@@ -174,9 +174,16 @@ export function ProductFormModal({
                   placeholder="0"
                   className="w-full bg-slate-50 px-3 py-2.5 outline-none transition focus:bg-white"
                 />
-                <span className="flex items-center border-l border-slate-200 bg-slate-50 px-4 text-slate-500">
-                  บาท / ชุด
+                <span className="flex items-center border-l border-slate-200 bg-slate-50 px-1 text-slate-500">
+                  บาท /
                 </span>
+                <input
+                  type="text"
+                  value={form.unit}
+                  onChange={(e) => onFormChange({ ...form, unit: e.target.value })}
+                  placeholder="ชิ้น"
+                  className="w-20 bg-slate-50 px-2 py-2.5 text-center outline-none transition focus:bg-white"
+                />
               </div>
             </label>
           )}

@@ -24,10 +24,10 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/30">
-                <span className="text-sm font-black tracking-tight">DD</span>
+                <span className="text-sm font-black tracking-tight">D8</span>
               </div>
               <div>
-                <p className="text-lg font-bold leading-tight">ดีเดย์</p>
+                <p className="text-lg font-bold leading-tight">ดีย์แปด</p>
                 <p className="text-sm font-medium leading-tight text-slate-400">ประตูม้วน</p>
               </div>
             </div>
@@ -35,7 +35,7 @@ export function Footer() {
               จำหน่ายและติดตั้งประตูม้วนทุกชนิด ใช้วัสดุคุณภาพ ราคาไม่แพง
               พร้อมบริการซ่อมบำรุงและอะไหล่ครบวงจร
             </p>
-            <p className="text-xs text-slate-500">หจก. ดีเดย์ ประตูม้วน (สำนักงานใหญ่)</p>
+            <p className="text-xs text-slate-500">บริษัท ดีย์แปด ประตูม้วน จำกัด (สำนักงานใหญ่)</p>
           </div>
 
           {/* Quick Links */}
@@ -66,24 +66,24 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <MapPinIcon className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
                 <span className="text-sm text-slate-400">
-                  422/63 หมู่ 5 ต.เขาคันทรง อ.ศรีราชา จ.ชลบุรี 20110
+                  40/7 ม.2 ต.มาบยางพร อ.ปลวกแดง จ.ระยอง 21140
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <PhoneIcon className="h-4 w-4 shrink-0 text-blue-400" />
                 <div className="text-sm">
-                  <a href="tel:0830151893" className="text-slate-400 transition hover:text-white">083-015-1893</a>
+                  <a href="tel:0918348666" className="text-slate-400 transition hover:text-white">091-834-8666</a>
                   <span className="mx-1.5 text-slate-600">|</span>
-                  <a href="tel:0860335224" className="text-slate-400 transition hover:text-white">086-033-5224</a>
+                  <a href="tel:0625450777" className="text-slate-400 transition hover:text-white">062-545-0777</a>
                 </div>
               </li>
               <li className="flex items-center gap-3">
                 <EnvelopeIcon className="h-4 w-4 shrink-0 text-blue-400" />
                 <a
-                  href="mailto:Ddayshutter@hotmail.com"
+                  href="mailto:d8shutterdoor@gmail.com"
                   className="text-sm text-slate-400 transition hover:text-white"
                 >
-                  Ddayshutter@hotmail.com
+                  d8shutterdoor@gmail.com
                 </a>
               </li>
             </ul>
@@ -97,8 +97,8 @@ export function Footer() {
             <div className="flex items-start gap-3">
               <ClockIcon className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
               <div className="text-sm text-slate-400">
-                <p>จันทร์ - เสาร์</p>
-                <p className="mt-1 text-lg font-bold text-white">08:30 - 17:30 น.</p>
+                <p>ทำการทุกวัน</p>
+                <p className="mt-1 text-lg font-bold text-white">08:00 - 17:00 น.</p>
               </div>
             </div>
             <div className="mt-5">
@@ -117,8 +117,8 @@ export function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-slate-800">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-6 py-4 text-xs text-slate-500 sm:flex-row md:px-8">
-          <p>&copy; {new Date().getFullYear()} ดีเดย์ ประตูม้วน — All Rights Reserved</p>
-          <p>ทะเบียนการค้า 0203551006260</p>
+          <p>&copy; {new Date().getFullYear()} บริษัท ดีย์แปด ประตูม้วน จำกัด — All Rights Reserved</p>
+          <p>เลขที่ผู้เสียภาษี 0215568001551</p>
         </div>
       </div>
     </footer>

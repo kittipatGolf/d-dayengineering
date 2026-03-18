@@ -1,12 +1,13 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { doorPricingService } from "@/lib/services/door-pricing.service";
 import { productCategoriesService } from "@/lib/services/product-categories.service";
 import type { ProductCategory } from "../product-categories/component/types";
 import { DoorPricingFormModal } from "./component/door-pricing-form-modal";
 import { DoorPricingTable } from "./component/door-pricing-table";
 import { SuccessToast } from "@/components/success-toast";
+import { ConfirmModal } from "@/components/confirm-modal";
 import type { DoorPricingFormState, DoorPricingRow } from "./component/types";
 
 function formatThaiDate(date = new Date()) {
@@ -17,10 +18,10 @@ function formatThaiDate(date = new Date()) {
   });
 }
 
-function emptyDoorPricingForm(categoryId: string): DoorPricingFormState {
+function emptyDoorPricingForm(categoryId: string, mode: "existing" | "new" = "new"): DoorPricingFormState {
   return {
     categoryId,
-    mode: "existing",
+    mode,
     selectedThickness: "",
     newThickness: "",
     minArea: "1",
@@ -39,6 +40,19 @@ export default function DoorPricingPage() {
   const [keyword, setKeyword] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const fetchRows = useCallback(async () => {
+    try {
+      const data = await doorPricingService.getAll();
+      setRows(data.map((r) => ({
+        ...r,
+        updatedAt: r.updatedAt ? formatThaiDate(new Date(r.updatedAt)) : formatThaiDate(),
+      })));
+    } catch {
+      setRows([]);
+    }
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -50,14 +64,9 @@ export default function DoorPricingPage() {
           setForm((prev) => ({ ...prev, categoryId: doors[0]?.id ?? "" }));
         })
         .catch(() => setDoorCategories([])),
-      doorPricingService.getAll().then((data) => {
-        setRows(data.map((r) => ({
-          ...r,
-          updatedAt: r.updatedAt ? formatThaiDate(new Date(r.updatedAt)) : formatThaiDate(),
-        })));
-      }).catch(() => setRows([])),
+      fetchRows(),
     ]).finally(() => setLoading(false));
-  }, []);
+  }, [fetchRows]);
 
   const filterOptions = useMemo(
     () => ["ทั้งหมด", ...doorCategories.map((item) => item.name)],
@@ -116,9 +125,11 @@ export default function DoorPricingPage() {
     setEditingId(null);
   };
 
-  const onDelete = async (id: string) => {
-    await doorPricingService.remove(id);
-    setRows((prev) => prev.filter((row) => row.id !== id));
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    await doorPricingService.remove(deleteId);
+    setDeleteId(null);
+    await fetchRows();
     setToast("ลบราคาสำเร็จ");
   };
 
@@ -143,17 +154,15 @@ export default function DoorPricingPage() {
     };
 
     if (editingId) {
-      const updated = await doorPricingService.update(editingId, payload);
-      const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
-      setRows((prev) => prev.map((row) => (row.id === editingId ? formatted : row)));
+      await doorPricingService.update(editingId, payload);
+      await fetchRows();
       closeModal();
       setToast("แก้ไขราคาสำเร็จ");
       return;
     }
 
-    const created = await doorPricingService.create(payload);
-    const formatted = { ...created, updatedAt: formatThaiDate(new Date(created.updatedAt)) };
-    setRows((prev) => [formatted, ...prev]);
+    await doorPricingService.create(payload);
+    await fetchRows();
     closeModal();
     setToast("เพิ่มราคาสำเร็จ");
   };
@@ -183,7 +192,7 @@ export default function DoorPricingPage() {
             onFilterChange={setFilterValue}
             onAdd={openCreate}
             onEdit={openEdit}
-            onDelete={onDelete}
+            onDelete={setDeleteId}
             keyword={keyword}
             onKeywordChange={setKeyword}
           />
@@ -191,6 +200,14 @@ export default function DoorPricingPage() {
       </section>
 
       {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
+      <ConfirmModal
+        open={!!deleteId}
+        message="คุณต้องการลบช่วงราคานี้ใช่หรือไม่?"
+        onCancel={() => setDeleteId(null)}
+        onConfirm={confirmDelete}
+        confirmText="ลบ"
+        variant="danger"
+      />
 
       <DoorPricingFormModal
         open={open}

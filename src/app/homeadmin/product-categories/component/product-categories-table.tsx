@@ -90,7 +90,29 @@ export function ProductCategoriesTable({
                     </span>
                   </td>
                   <td className="px-5 py-4 text-slate-600">
-                    {item.kind === "ประตูม้วน" ? `${item.colors.length} สี` : "—"}
+                    {item.kind === "ประตูม้วน" && item.colors.length > 0 ? (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {item.colors.map((color) => {
+                          const colorMap: Record<string, string> = {
+                            "ขาว": "#FFFFFF", "ครีม": "#FFFDD0", "เทาเข้ม": "#4A4A4A",
+                            "ดำ": "#000000", "น้ำเงิน": "#1E40AF", "แดง": "#DC2626",
+                            "เขียว": "#16A34A", "เหลือง": "#EAB308", "ส้ม": "#EA580C",
+                            "ชมพู": "#EC4899", "ม่วง": "#9333EA", "น้ำตาล": "#92400E",
+                            "เทา": "#9CA3AF", "ฟ้า": "#38BDF8",
+                          };
+                          const hex = colorMap[color] || "#9CA3AF";
+                          return (
+                            <span key={color} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs">
+                              <span
+                                className="inline-block h-3 w-3 rounded-full border border-slate-300"
+                                style={{ backgroundColor: hex }}
+                              />
+                              {color}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ) : "—"}
                   </td>
                   <td className="px-5 py-4">
                     <button

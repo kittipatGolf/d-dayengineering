@@ -95,7 +95,7 @@ export function SlideShow() {
     <section className="w-full">
       <div
         key={activeSlide}
-        className={`animate-fade-in relative min-h-96 overflow-hidden rounded-3xl bg-linear-to-r ${currentSlide.background} text-white shadow-lg md:min-h-110`}
+        className={`animate-fade-in relative h-96 overflow-hidden rounded-3xl bg-linear-to-r ${currentSlide.background} text-white shadow-lg md:h-110`}
       >
         {/* Decorative elements */}
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
@@ -103,7 +103,7 @@ export function SlideShow() {
         <div className="absolute right-1/4 top-1/3 h-32 w-32 rounded-full bg-white/5 blur-2xl" />
 
         {/* Content */}
-        <div className="relative z-10 flex min-h-96 flex-col justify-center px-10 py-12 md:min-h-110 md:px-16 lg:px-20">
+        <div className="relative z-10 flex h-96 flex-col justify-center px-10 py-12 md:h-110 md:px-16 lg:px-20">
           <div className="max-w-2xl">
             <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm ring-1 ring-white/20">
               <CurrentIcon className="h-7 w-7" />

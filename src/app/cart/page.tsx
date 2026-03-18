@@ -487,7 +487,7 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={handleClearAddress}
-                        className="text-sm text-slate-500 underline hover:text-slate-700"
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                       >
                         กรอกที่อยู่เอง
                       </button>
@@ -513,8 +513,9 @@ export default function CartPage() {
                         address: { ...p.address, line: e.target.value },
                       }))
                     }
+                    readOnly={!!selectedAddressId}
                     placeholder="เลขที่ ซอย ถนน"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-slate-800 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className={`w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-slate-800 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${selectedAddressId ? "cursor-not-allowed opacity-60" : ""}`}
                   />
                 </div>
                 <ThaiAddressInput
@@ -530,7 +531,8 @@ export default function CartPage() {
                       address: { ...p.address, ...v },
                     }))
                   }
-                  inputClassName="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-slate-800 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  disabled={!!selectedAddressId}
+                  inputClassName={`w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-slate-800 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${selectedAddressId ? "cursor-not-allowed opacity-60" : ""}`}
                   labelClassName="mb-1.5 block text-sm text-slate-600"
                 />
               </div>

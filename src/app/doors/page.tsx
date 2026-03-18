@@ -129,11 +129,12 @@ export default function DoorsPage() {
 
   const handleAddToCart = () => {
     if (!selectedDoorType || !width || !length || !thickness || !color) return;
+    const matchedProduct = products.find((p) => p.categoryName === selectedDoorType);
     addItem({
       type: "door",
-      name: selectedDoorType,
+      name: matchedProduct?.name ?? selectedDoorType,
       categoryName: matchingCategory?.name ?? selectedDoorType,
-      images: [],
+      images: matchedProduct?.images ?? [],
       color,
       widthM: parseFloat(width),
       lengthM: parseFloat(length),
@@ -160,7 +161,7 @@ export default function DoorsPage() {
           </div>
           <h1 className="text-3xl font-bold md:text-5xl">ประตูม้วน</h1>
           <p className="mx-auto mt-3 max-w-xl text-base text-blue-200/80">
-            เลือกประตูม้วนคุณภาพจาก D-Day Engineering ติดตั้งโดยช่างมืออาชีพ
+            เลือกประตูม้วนคุณภาพจากดีย์แปดประตูม้วน ติดตั้งโดยช่างมืออาชีพ
           </p>
         </div>
       </div>

@@ -9,7 +9,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
   const { id } = await params;
   const body = await request.json();
   // Whitelist allowed fields to prevent mass assignment
-  const ALLOWED_FIELDS = ["firstName", "lastName", "email", "phone", "role"] as const;
+  const ALLOWED_FIELDS = ["username", "firstName", "lastName", "email", "phone", "role"] as const;
   const data: Record<string, unknown> = {};
   for (const key of ALLOWED_FIELDS) {
     if (body[key] !== undefined) data[key] = body[key];

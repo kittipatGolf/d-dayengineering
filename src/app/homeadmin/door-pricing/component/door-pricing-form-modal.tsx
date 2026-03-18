@@ -72,10 +72,10 @@ export function DoorPricingFormModal({
             <button
               type="button"
               onClick={() => onFormChange({ ...form, mode: "existing", newThickness: "" })}
-              className={`rounded-xl px-3 py-1.5 text-xs transition ${
+              className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
                 form.mode === "existing"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-slate-100 text-slate-600"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               ใช้ความหนาที่มี
@@ -83,10 +83,10 @@ export function DoorPricingFormModal({
             <button
               type="button"
               onClick={() => onFormChange({ ...form, mode: "new", selectedThickness: "" })}
-              className={`rounded-xl px-3 py-1.5 text-xs transition ${
+              className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
                 form.mode === "new"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-slate-100 text-slate-600"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               เพิ่มความหนาใหม่

@@ -9,6 +9,7 @@ import {
   Bars3Icon,
   BellIcon,
   ChatBubbleLeftRightIcon,
+  ChevronDownIcon,
   Cog6ToothIcon,
   HomeIcon,
   InformationCircleIcon,
@@ -90,22 +91,22 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-600/25">
-            <span className="text-sm font-black tracking-tight text-white">DD</span>
+            <span className="text-sm font-black tracking-tight text-white">D8</span>
           </div>
           <span className="hidden text-lg font-bold tracking-wide text-slate-900 sm:block">
-            D-Day Engineering
+            ดีย์แปดประตูม้วน
           </span>
         </Link>
 
-        {/* Desktop nav — no icons to save space */}
-        <nav className="hidden min-w-0 items-center gap-0.5 xl:flex">
+        {/* Desktop nav — centered */}
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex">
           {navItems.map((item) => {
             const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-[16px] font-medium transition-all duration-200 ${
                   active
                     ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -155,6 +156,7 @@ export function Navbar() {
                   {user.firstName?.charAt(0) ?? "U"}
                 </div>
                 <span className="hidden 2xl:inline">{user.firstName}</span>
+                <ChevronDownIcon className="h-3.5 w-3.5 text-slate-400" />
               </Link>
               <button
                 type="button"

@@ -46,7 +46,7 @@ export default function PortfolioPage() {
           </div>
           <h1 className="text-3xl font-bold md:text-5xl">ผลงานของเรา</h1>
           <p className="mx-auto mt-3 max-w-xl text-base text-blue-200/80">
-            ผลงานติดตั้งและซ่อมประตูม้วนจาก D-Day Engineering
+            ผลงานติดตั้งและซ่อมประตูม้วนจากดีย์แปดประตูม้วน
           </p>
         </div>
       </div>

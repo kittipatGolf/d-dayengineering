@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { HistoryAddressModal } from "../history/component/history-address-modal";
 import { repairRequestsService } from "@/lib/services/repair-requests.service";
 import { RepairPriceModal } from "./component/repair-price-modal";
@@ -30,12 +30,19 @@ export default function RepairRequestsPage() {
   const [parts, setParts] = useState<{ id: string; name: string; price: number | null }[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchRows = useCallback(async () => {
+    try {
+      const items = await repairRequestsService.getAll();
+      setRows(items.filter((item) => isActiveStatus(item.status)));
+    } catch (err) {
+      console.error("Failed to fetch repair requests:", err);
+      setRows([]);
+    }
+  }, []);
+
   useEffect(() => {
     Promise.all([
-      repairRequestsService
-        .getAll()
-        .then((items) => setRows(items.filter((item) => isActiveStatus(item.status))))
-        .catch((err) => { console.error("Failed to fetch repair requests:", err); setRows([]); }),
+      fetchRows(),
       fetch("/api/products")
         .then((r) => r.json())
         .then((products: { id: string; name: string; kind: string; price: number | null }[]) =>
@@ -43,7 +50,7 @@ export default function RepairRequestsPage() {
         )
         .catch((err) => console.error("Failed to fetch parts:", err)),
     ]).finally(() => setLoading(false));
-  }, []);
+  }, [fetchRows]);
 
   const filteredRows = useMemo(() => {
     const q = keyword.trim().toLowerCase();
@@ -74,12 +81,8 @@ export default function RepairRequestsPage() {
       return;
     }
 
-    const updated = await repairRequestsService.updateStatus(id, status);
-    if (!updated) {
-      setRows((prev) => prev.filter((item) => item.id !== id));
-      return;
-    }
-    setRows((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    await repairRequestsService.updateStatus(id, status);
+    await fetchRows();
     setToast("เปลี่ยนสถานะสำเร็จ");
   };
 
@@ -88,12 +91,8 @@ export default function RepairRequestsPage() {
     const price = Number(repairPriceInput);
     if (!Number.isFinite(price) || price < 0) return;
 
-    const updated = await repairRequestsService.updateStatus(pendingCompleteId, "สำเร็จ", price);
-    if (!updated) {
-      setRows((prev) => prev.filter((item) => item.id !== pendingCompleteId));
-    } else {
-      setRows((prev) => prev.map((item) => (item.id === pendingCompleteId ? updated : item)));
-    }
+    await repairRequestsService.updateStatus(pendingCompleteId, "สำเร็จ", price);
+    await fetchRows();
     setPriceModalOpen(false);
     setPendingCompleteId(null);
     setRepairPriceInput("");
@@ -102,8 +101,8 @@ export default function RepairRequestsPage() {
 
   const onSelectPart = async (id: string, partName: string) => {
     try {
-      const updated = await repairRequestsService.updateFields(id, { selectedPart: partName });
-      setRows((prev) => prev.map((item) => (item.id === id ? { ...item, ...updated } : item)));
+      await repairRequestsService.updateFields(id, { selectedPart: partName });
+      await fetchRows();
       setToast("เลือกอะไหล่สำเร็จ");
     } catch (err) {
       console.error("Failed to select part:", err);
@@ -119,8 +118,8 @@ export default function RepairRequestsPage() {
   const confirmInitialPrice = async () => {
     const price = Number(repairPriceInput);
     if (!Number.isFinite(price) || price < 0) return;
-    const updatedRows = await repairRequestsService.updateInitialPrice(price);
-    setRows(updatedRows.filter((item) => isActiveStatus(item.status)));
+    await repairRequestsService.updateInitialPrice(price);
+    await fetchRows();
     setPriceModalOpen(false);
     setRepairPriceInput("");
     setToast("อัปเดตราคาซ่อมเริ่มต้นสำเร็จ");

@@ -49,7 +49,7 @@ export function OrdersTable({
   onChangeStatus,
 }: OrdersTableProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       {/* header */}
       <div className="border-b border-slate-100 px-5 py-4">
         <div className="flex items-center gap-2">

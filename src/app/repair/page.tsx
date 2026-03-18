@@ -294,18 +294,42 @@ export default function RepairPage() {
             </div>
 
             {user && savedAddresses.length > 0 && (
-              <RepairSelectField
-                id="address-book"
-                label="เลือกที่อยู่ที่บันทึกไว้"
-                placeholder="เลือกที่อยู่"
-                options={addressOptions}
-                value={
-                  selectedAddressId
-                    ? addressOptions[savedAddresses.findIndex((a) => a.id === selectedAddressId)] ?? ""
-                    : ""
-                }
-                onSelect={handleAddressSelect}
-              />
+              <div>
+                <label className="mb-2 block font-medium text-slate-700">
+                  เลือกที่อยู่ที่บันทึกไว้
+                </label>
+                <div className="space-y-2">
+                  {savedAddresses.map((addr) => (
+                    <button
+                      key={addr.id}
+                      type="button"
+                      onClick={() => handleAddressSelect(
+                        `${addr.line}, ${addr.subdistrict}, ${addr.district}, ${addr.province} ${addr.postalCode}`
+                      )}
+                      className={`w-full rounded-xl border p-3.5 text-left text-sm transition ${
+                        selectedAddressId === addr.id
+                          ? "border-blue-500 bg-blue-50 text-blue-700 shadow-sm"
+                          : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                      }`}
+                    >
+                      {addr.line}, {addr.subdistrict}, {addr.district}, {addr.province} {addr.postalCode}
+                    </button>
+                  ))}
+                  {selectedAddressId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedAddressId("");
+                        setAddressLine("");
+                        setAddressFields({ province: "", district: "", subdistrict: "", postalCode: "" });
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    >
+                      กรอกที่อยู่เอง
+                    </button>
+                  )}
+                </div>
+              </div>
             )}
 
             <div className="space-y-2">
@@ -318,14 +342,16 @@ export default function RepairPage() {
                 placeholder="*บ้านเลขที่ ถนน ซอย"
                 value={addressLine}
                 onChange={(e) => setAddressLine(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 placeholder:text-slate-400 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                readOnly={!!selectedAddressId}
+                className={`w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 placeholder:text-slate-400 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${selectedAddressId ? "cursor-not-allowed opacity-60" : ""}`}
               />
             </div>
 
             <ThaiAddressInput
               value={addressFields}
               onChange={setAddressFields}
-              inputClassName="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 placeholder:text-slate-400 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              disabled={!!selectedAddressId}
+              inputClassName={`w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 placeholder:text-slate-400 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${selectedAddressId ? "cursor-not-allowed opacity-60" : ""}`}
               labelClassName="font-medium text-slate-700"
             />
 

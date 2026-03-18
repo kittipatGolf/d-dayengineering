@@ -34,8 +34,9 @@ export default function LoginPage() {
       return;
     }
 
+    const dest = result.user?.role === "Admin" ? "/homeadmin" : "/";
+    router.push(dest);
     router.refresh();
-    router.push(result.user?.role === "Admin" ? "/homeadmin" : "/");
   }
 
   return (
@@ -47,7 +48,7 @@ export default function LoginPage() {
           <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-blue-400/10 blur-3xl" />
           <div className="relative">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
-              <span className="text-lg font-black tracking-tight">DD</span>
+              <span className="text-lg font-black tracking-tight">D8</span>
             </div>
             <h2 className="mt-8 text-4xl font-bold leading-tight">
               ยินดีต้อนรับ
@@ -55,10 +56,10 @@ export default function LoginPage() {
               <span className="text-blue-300">กลับมา</span>
             </h2>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-blue-200/80">
-              เข้าสู่ระบบเพื่อจัดการคำสั่งซื้อ ติดตามงานซ่อม และเข้าถึงบริการทั้งหมดของดีเดย์ ประตูม้วน
+              เข้าสู่ระบบเพื่อจัดการคำสั่งซื้อ ติดตามงานซ่อม และเข้าถึงบริการทั้งหมดของดีย์แปด ประตูม้วน
             </p>
           </div>
-          <p className="relative text-xs text-blue-200/50">D-Day Engineering &mdash; Smart Service Platform</p>
+          <p className="relative text-xs text-blue-200/50">DEE8 SHUTTER DOOR &mdash; Smart Service Platform</p>
         </div>
 
         {/* Right side - form */}
@@ -66,9 +67,9 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="mb-6 flex items-center gap-3 md:hidden">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-600/25">
-              <span className="text-xs font-black text-white">DD</span>
+              <span className="text-xs font-black text-white">D8</span>
             </div>
-            <span className="text-lg font-bold text-slate-900">D-Day Engineering</span>
+            <span className="text-lg font-bold text-slate-900">ดีย์แปดประตูม้วน</span>
           </div>
 
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">เข้าสู่ระบบ</h1>

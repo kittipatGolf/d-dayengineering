@@ -75,10 +75,10 @@ export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
             </button>
             <div className="hidden items-center gap-2.5 sm:flex">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm shadow-blue-600/25">
-                <span className="text-xs font-black text-white">DD</span>
+                <span className="text-xs font-black text-white">D8</span>
               </div>
               <div className="leading-tight">
-                <p className="text-sm font-bold text-slate-900">D-Day Admin</p>
+                <p className="text-sm font-bold text-slate-900">DEE8 Admin</p>
                 <p className="text-[11px] text-slate-400">ระบบจัดการหลังบ้าน</p>
               </div>
             </div>

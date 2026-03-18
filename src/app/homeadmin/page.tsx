@@ -13,7 +13,7 @@ export default function HomeAdminPage() {
         <div className="relative">
           <p className="text-sm font-medium text-blue-200">แดชบอร์ด</p>
           <h1 className="mt-1 text-2xl font-bold md:text-3xl">ยินดีต้อนรับ, ผู้ดูแลระบบ</h1>
-          <p className="mt-2 text-sm text-blue-200/70">ภาพรวมข้อมูลทั้งหมดของร้านดีเดย์ ประตูม้วน</p>
+          <p className="mt-2 text-sm text-blue-200/70">ภาพรวมข้อมูลทั้งหมดของร้านดีย์แปด ประตูม้วน</p>
         </div>
       </header>
 

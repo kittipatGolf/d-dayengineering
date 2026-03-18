@@ -1,7 +1,6 @@
 import {
   BuildingOffice2Icon,
   ClockIcon,
-  GlobeAltIcon,
   MapPinIcon,
   PhoneIcon,
 } from "@heroicons/react/24/outline";
@@ -10,21 +9,21 @@ const contactCards = [
   {
     icon: BuildingOffice2Icon,
     title: "ชื่อธุรกิจ",
-    lines: ["ห้างหุ้นส่วนจำกัด ดี เดย์ ประตูม้วน"],
+    lines: ["บริษัท ดีย์แปด ประตูม้วน จำกัด", "DEE8 SHUTTER DOOR CO., LTD"],
   },
   {
     icon: MapPinIcon,
     title: "ที่อยู่",
     lines: [
-      "422/63 หมู่ที่ 5 ตำบลเขาคันทรง",
-      "อำเภอศรีราชา จังหวัดชลบุรี 20110",
+      "40/7 ม.2 ต.มาบยางพร",
+      "อ.ปลวกแดง จ.ระยอง 21140",
     ],
   },
   {
     icon: PhoneIcon,
     title: "โทรศัพท์",
-    lines: ["083-015-1893", "086-033-5224"],
-    action: { label: "โทรเลย", href: "tel:0830151893" },
+    lines: ["091-834-8666", "062-545-0777"],
+    action: { label: "โทรเลย", href: "tel:0918348666" },
   },
   {
     icon: ClockIcon,
@@ -81,33 +80,6 @@ export default function ContactPage() {
         ))}
       </div>
 
-      {/* Social & website */}
-      <section className="animate-fade-in-up rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-          <div>
-            <h3 className="font-bold text-slate-900">เว็บไซต์และโซเชียล</h3>
-            <a
-              href="https://d-dayengineering.yellowpages.co.th"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="mt-1 inline-flex items-center gap-1.5 text-sm text-blue-600 transition hover:text-blue-700 hover:underline"
-            >
-              <GlobeAltIcon className="h-4 w-4" />
-              d-dayengineering.yellowpages.co.th
-            </a>
-          </div>
-          <a
-            href="https://d-dayengineering.yellowpages.co.th/"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex items-center gap-2 rounded-full bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-sky-600"
-          >
-            <GlobeAltIcon className="h-4 w-4" />
-            เยี่ยมชมเว็บไซต์
-          </a>
-        </div>
-      </section>
-
       {/* Map */}
       <section className="animate-fade-in-up overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="flex items-center gap-3 border-b border-slate-200 px-6 py-4">
@@ -116,13 +88,13 @@ export default function ContactPage() {
           </div>
           <div>
             <h2 className="text-lg font-bold text-slate-900">แผนที่ตั้งของเรา</h2>
-            <p className="text-xs text-slate-500">พิกัด: 13.065418, 101.138217</p>
+            <p className="text-xs text-slate-500">พิกัด: 12.965026, 101.165106</p>
           </div>
         </div>
         <div className="relative h-72 sm:h-96 md:h-120">
           <iframe
-            title="แผนที่ตั้งของดีเดย์ประตูม้วน"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.532865830966!2d101.1381996!3d13.0653793!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3102c5d7963e7d5d%3A0xf8e82970dc2ad385!2z4Lir4LiI4LiBLuC4lOC4teC5gOC4lOC4ouC5jCDguJvguKPguLDguJXguLnguKHguYnguKfguJk!5e0!3m2!1sth!2sth!4v1772985309822!5m2!1sth!2sth"
+            title="แผนที่ตั้งของดีย์แปดประตูม้วน"
+            src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3886.0!2d101.165106!3d12.965026!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTLCsDU3JzU0LjEiTiAxMDHCsDA5JzU0LjQiRQ!5e0!3m2!1sth!2sth"
             className="h-full w-full border-0"
             loading="lazy"
             allowFullScreen

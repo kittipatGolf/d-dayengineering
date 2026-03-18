@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { productCategoriesService } from "@/lib/services/product-categories.service";
 import { productsService } from "@/lib/services/products.service";
 import type { CategoryKind, ProductCategory } from "../product-categories/component/types";
@@ -29,6 +29,7 @@ function emptyProductForm(type: CategoryKind, categoryId: string): ProductFormSt
     name: "",
     categoryId,
     price: "",
+    unit: "ชิ้น",
     colors: [],
     description: "",
     warrantyYears: "",
@@ -51,6 +52,18 @@ export default function ProductsPage() {
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProducts = useCallback(async () => {
+    try {
+      const data = await productsService.getAll();
+      setProducts(data.map((p) => ({
+        ...p,
+        updatedAt: p.updatedAt ? formatThaiDate(new Date(p.updatedAt)) : formatThaiDate(),
+      })));
+    } catch {
+      setProducts([]);
+    }
+  }, []);
+
   useEffect(() => {
     Promise.all([
       productCategoriesService
@@ -62,14 +75,9 @@ export default function ProductsPage() {
           setForm((prev) => ({ ...prev, categoryId: firstDoorCategory?.id ?? "" }));
         })
         .catch(() => setAllActiveCategories([])),
-      productsService.getAll().then((data) => {
-        setProducts(data.map((p) => ({
-          ...p,
-          updatedAt: p.updatedAt ? formatThaiDate(new Date(p.updatedAt)) : formatThaiDate(),
-        })));
-      }).catch(() => setProducts([])),
+      fetchProducts(),
     ]).finally(() => setLoading(false));
-  }, []);
+  }, [fetchProducts]);
 
   const categoryOptions = useMemo(
     () => allActiveCategories.filter((item) => item.kind === form.productType),
@@ -150,9 +158,8 @@ export default function ProductsPage() {
     const updated = await productsService.update(id, {
       status: target.status === "วางขาย" ? "ยกเลิกการขาย" : "วางขาย",
     });
-    const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
-    setProducts((prev) => prev.map((item) => (item.id === id ? formatted : item)));
-    setToast(formatted.status === "วางขาย" ? "เปิดวางขายสำเร็จ" : "ยกเลิกการขายสำเร็จ");
+    await fetchProducts();
+    setToast(updated.status === "วางขาย" ? "เปิดวางขายสำเร็จ" : "ยกเลิกการขายสำเร็จ");
   };
 
   const editProduct = (id: string) => {
@@ -165,6 +172,7 @@ export default function ProductsPage() {
       name: target.name,
       categoryId: target.categoryId,
       price: target.price ? String(target.price) : "",
+      unit: (target as ProductItem & { unit?: string }).unit || "ชิ้น",
       colors: target.colors,
       description: target.description,
       warrantyYears: target.warrantyYears,
@@ -191,6 +199,7 @@ export default function ProductsPage() {
       categoryId: category.id,
       categoryName: category.name,
       price: isDoor ? null : price,
+      unit: isDoor ? "" : form.unit.trim() || "ชิ้น",
       colors: isDoor ? form.colors : [],
       description: form.description.trim(),
       warrantyYears: form.warrantyYears.trim(),
@@ -200,17 +209,15 @@ export default function ProductsPage() {
 
     try {
       if (editingId) {
-        const updated = await productsService.update(editingId, payload);
-        const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
-        setProducts((prev) => prev.map((item) => (item.id === editingId ? formatted : item)));
+        await productsService.update(editingId, payload);
+        await fetchProducts();
         closeModal();
         setToast("แก้ไขสินค้าสำเร็จ");
         return;
       }
 
-      const created = await productsService.create(payload);
-      const formatted = { ...created, updatedAt: formatThaiDate(new Date(created.updatedAt)) };
-      setProducts((prev) => [formatted, ...prev]);
+      await productsService.create(payload);
+      await fetchProducts();
       closeModal();
       setToast("เพิ่มสินค้าสำเร็จ");
     } catch (err) {

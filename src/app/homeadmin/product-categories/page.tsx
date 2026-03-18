@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   TagIcon,
   WrenchScrewdriverIcon,
@@ -40,14 +40,21 @@ export default function ProductCategoriesPage() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    productCategoriesService.getAll().then((cats) => {
+  const fetchCategories = useCallback(async () => {
+    try {
+      const cats = await productCategoriesService.getAll();
       setCategories(cats.map((c) => ({
         ...c,
         updatedAt: c.updatedAt ? formatThaiDate(new Date(c.updatedAt)) : formatThaiDate(),
       })));
-    }).catch(() => setCategories([])).finally(() => setLoading(false));
+    } catch {
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { fetchCategories(); }, [fetchCategories]);
 
   const filteredRows = useMemo(() => {
     let result = categories;
@@ -111,9 +118,8 @@ export default function ProductCategoriesPage() {
     const updated = await productCategoriesService.update(id, {
       isActive: !target.isActive,
     });
-    const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
-    setCategories((prev) => prev.map((item) => (item.id === id ? formatted : item)));
-    setToast(formatted.isActive ? "เปิดใช้งานสำเร็จ" : "ปิดใช้งานสำเร็จ");
+    await fetchCategories();
+    setToast(updated.isActive ? "เปิดใช้งานสำเร็จ" : "ปิดใช้งานสำเร็จ");
   };
 
   const requestDeleteCategory = (id: string) => {
@@ -126,7 +132,7 @@ export default function ProductCategoriesPage() {
     setPendingDeleteId(null);
     try {
       await productCategoriesService.remove(id);
-      setCategories((prev) => prev.filter((item) => item.id !== id));
+      await fetchCategories();
       setToast("ลบประเภทสินค้าสำเร็จ");
     } catch {
       setAlertMsg("ไม่สามารถลบได้ อาจมีสินค้าอยู่ในประเภทนี้");
@@ -152,27 +158,25 @@ export default function ProductCategoriesPage() {
     if (kind === "ประตูม้วน" && selectedColors.length === 0) return;
 
     if (editingId) {
-      const updated = await productCategoriesService.update(editingId, {
+      await productCategoriesService.update(editingId, {
         name: trimmedName,
         kind,
         colors: kind === "ประตูม้วน" ? selectedColors : [],
         isActive,
       });
-      const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
-      setCategories((prev) => prev.map((item) => (item.id === editingId ? formatted : item)));
+      await fetchCategories();
       closeModal();
       setToast("แก้ไขประเภทสินค้าสำเร็จ");
       return;
     }
 
-    const created = await productCategoriesService.create({
+    await productCategoriesService.create({
       name: trimmedName,
       kind,
       colors: kind === "ประตูม้วน" ? selectedColors : [],
       isActive,
     });
-    const formatted = { ...created, updatedAt: formatThaiDate(new Date(created.updatedAt)) };
-    setCategories((prev) => [formatted, ...prev]);
+    await fetchCategories();
     closeModal();
     setToast("เพิ่มประเภทสินค้าสำเร็จ");
   };

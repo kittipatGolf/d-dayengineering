@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "D-Day Engineering",
-  description: "บริการประตูม้วน อะไหล่ และงานซ่อมครบวงจร",
+  title: "ดีย์แปดประตูม้วน | DEE8 SHUTTER DOOR",
+  description: "บริษัท ดีย์แปด ประตูม้วน จำกัด — จำหน่าย ติดตั้ง ซ่อมประตูม้วน และอะไหล่ครบวงจร",
 };
 
 export default function RootLayout({

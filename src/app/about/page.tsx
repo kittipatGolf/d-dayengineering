@@ -84,7 +84,7 @@ export default function AboutPage() {
               <CheckBadgeIcon className="h-9 w-9" />
             </div>
             <h1 className="text-3xl font-bold leading-tight md:text-5xl">
-              ดีเดย์ประตูม้วน
+              ดีย์แปดประตูม้วน
             </h1>
             <p className="mt-2 text-lg font-medium text-blue-200 md:text-2xl">
               ผู้เชี่ยวชาญงานประตูม้วนทุกระบบและประตูรั้วโรงงาน
@@ -118,7 +118,7 @@ export default function AboutPage() {
           5 เหตุผลหลัก
         </h2>
         <p className="mb-8 text-center text-slate-500">
-          ที่ลูกค้าเลือกดีเดย์ประตูม้วน
+          ที่ลูกค้าเลือกดีย์แปดประตูม้วน
         </p>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
           {reasons.map((r, i) => (
@@ -139,18 +139,18 @@ export default function AboutPage() {
 
       {/* Brand highlight */}
       <section className="animate-fade-in-up rounded-3xl border border-slate-200 bg-linear-to-br from-blue-50 via-white to-sky-50 p-8 text-center shadow-sm md:p-12">
-        <p className="text-4xl font-black tracking-tight text-blue-700 sm:text-6xl">ดีเดย์</p>
+        <p className="text-4xl font-black tracking-tight text-blue-700 sm:text-6xl">ดีย์แปด</p>
         <p className="text-3xl font-black text-slate-900 sm:text-5xl">ประตูม้วน</p>
         <div className="mx-auto mt-6 max-w-3xl">
           <h3 className="text-xl font-bold text-slate-800 md:text-2xl">
             ประตูม้วนดีมีคุณภาพ ช่างประตูม้วนดีมีฝีมือ
           </h3>
           <p className="mt-3 text-slate-600 md:text-lg">
-            หจก. ดีเดย์ ประตูม้วน ทะเบียนการค้า 0203551006260
+            บริษัท ดีย์แปด ประตูม้วน จำกัด เลขที่ผู้เสียภาษี 0215568001551
           </p>
           <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white shadow-lg">
             <PhoneIcon className="h-5 w-5" />
-            <span className="text-lg font-bold md:text-xl">083-015-1893, 086-033-5224</span>
+            <span className="text-lg font-bold md:text-xl">091-834-8666, 062-545-0777</span>
           </div>
           <p className="mt-3 text-sm text-slate-500">ติดต่อได้ทุกวัน</p>
         </div>

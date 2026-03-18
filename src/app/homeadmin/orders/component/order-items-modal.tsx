@@ -29,7 +29,7 @@ export function OrderItemsModal({ open, items, getColorOptions, onClose, onSave 
       open={open}
       onClose={onClose}
       title="รายการสินค้า"
-      maxWidthClassName="max-w-6xl"
+      maxWidthClassName="max-w-screen-xl"
       footer={
         tab === "แก้ไขรายการ" ? (
           <div className="ml-auto flex items-center gap-2">

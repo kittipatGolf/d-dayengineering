@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usersService } from "@/lib/services/users.service";
 import { UserAddressEditModal } from "./component/user-address-edit-modal";
 import { UserAddressesModal } from "./component/user-addresses-modal";
@@ -57,9 +57,18 @@ export default function UsersPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    usersService.getAll().then(setUsers).catch(() => setUsers([])).finally(() => setLoading(false));
+  const fetchUsers = useCallback(async () => {
+    try {
+      const data = await usersService.getAll();
+      setUsers(data);
+    } catch {
+      setUsers([]);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchUsers().finally(() => setLoading(false));
+  }, [fetchUsers]);
 
   const filteredUsers = useMemo(() => {
     const q = keyword.trim().toLowerCase();
@@ -116,15 +125,15 @@ export default function UsersPage() {
 
   const saveEdit = async () => {
     if (!editingUserId) return;
-    const updated = await usersService.update(editingUserId, editForm);
-    setUsers((prev) => prev.map((item) => (item.id === editingUserId ? updated : item)));
+    await usersService.update(editingUserId, editForm);
+    await fetchUsers();
     closeEditModal();
     setToast("แก้ไขข้อมูลผู้ใช้สำเร็จ");
   };
 
   const deleteUser = async (id: string) => {
     await usersService.remove(id);
-    setUsers((prev) => prev.filter((item) => item.id !== id));
+    await fetchUsers();
     setToast("ลบผู้ใช้สำเร็จ");
   };
 
@@ -155,7 +164,7 @@ export default function UsersPage() {
 
     const updatedUser = await usersService.updateAddresses(selectedUserForAddress.id, nextAddresses);
 
-    setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
+    await fetchUsers();
     setSelectedUserForAddress(updatedUser);
     closeAddressEditModal();
     setToast("แก้ไขที่อยู่สำเร็จ");
@@ -165,7 +174,7 @@ export default function UsersPage() {
     if (!selectedUserForAddress) return;
     const nextAddresses = selectedUserForAddress.addresses.filter((address) => address.id !== addressId);
     const updatedUser = await usersService.updateAddresses(selectedUserForAddress.id, nextAddresses);
-    setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
+    await fetchUsers();
     setSelectedUserForAddress(updatedUser);
     setToast("ลบที่อยู่สำเร็จ");
   };

@@ -18,7 +18,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <h2 style="color: #0ea5e9;">D-Day Engineering</h2>
+      <h2 style="color: #0ea5e9;">ดีย์แปดประตูม้วน</h2>
       <p>คุณได้ขอรีเซ็ตรหัสผ่าน กรุณากดปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
       <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
         รีเซ็ตรหัสผ่าน
@@ -39,7 +39,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   await transporter.sendMail({
     from: FROM,
     to: email,
-    subject: "รีเซ็ตรหัสผ่าน - D-Day Engineering",
+    subject: "รีเซ็ตรหัสผ่าน - ดีย์แปดประตูม้วน",
     html,
   });
 }

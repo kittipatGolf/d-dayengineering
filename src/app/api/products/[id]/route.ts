@@ -9,10 +9,17 @@ export async function PUT(request: NextRequest, { params }: Params) {
   try { await requireAdmin(); } catch (res) { return res as NextResponse; }
   const { id } = await params;
   const body = await request.json();
-  const req = validateRequired(body, ["name"]);
-  if (!req.valid) return NextResponse.json({ error: req.error }, { status: 400 });
-  const { name, kind, categoryId, categoryName, price, colors, description, warrantyYears, images, status } = body;
-  const data = { name, kind, categoryId, categoryName, price, colors, description, warrantyYears, images, status };
+
+  // Allow partial updates (e.g. toggle status only)
+  const fields = ["name", "kind", "categoryId", "categoryName", "price", "unit", "colors", "description", "warrantyYears", "images", "status"] as const;
+  const data: Record<string, unknown> = {};
+  for (const key of fields) {
+    if (body[key] !== undefined) data[key] = body[key];
+  }
+
+  if (Object.keys(data).length === 0) {
+    return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+  }
 
   const product = await prisma.product.update({ where: { id }, data });
   return NextResponse.json(product);

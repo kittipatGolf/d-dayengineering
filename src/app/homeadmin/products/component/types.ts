@@ -23,6 +23,7 @@ export type ProductFormState = {
   name: string;
   categoryId: string;
   price: string;
+  unit: string;
   colors: string[];
   description: string;
   warrantyYears: string;

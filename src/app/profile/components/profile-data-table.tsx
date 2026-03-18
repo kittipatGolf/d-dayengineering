@@ -1,6 +1,17 @@
 import { TrashIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 
+const statusColors: Record<string, string> = {
+  "รอการยืนยัน": "bg-amber-50 text-amber-700 border-amber-200",
+  "ได้รับการยืนยัน": "bg-blue-50 text-blue-700 border-blue-200",
+  "สำเร็จ": "bg-emerald-50 text-emerald-700 border-emerald-200",
+  "ยกเลิก": "bg-rose-50 text-rose-700 border-rose-200",
+};
+
+function isStatus(text: string): boolean {
+  return text in statusColors;
+}
+
 type ProfileDataTableProps = {
   columns: string[];
   rows?: string[][];
@@ -53,7 +64,13 @@ export function ProfileDataTable({
                 return (
                   <div key={col} className="flex items-start gap-2 py-1">
                     <span className="shrink-0 font-semibold text-slate-700">{col}:</span>
-                    <span className="text-slate-600">{row[colIndex] ?? "-"}</span>
+                    {isStatus(row[colIndex] ?? "") ? (
+                      <span className={`inline-flex rounded-lg border px-2.5 py-1 text-xs font-semibold ${statusColors[row[colIndex]]}`}>
+                        {row[colIndex]}
+                      </span>
+                    ) : (
+                      <span className="text-slate-600">{row[colIndex] ?? "-"}</span>
+                    )}
                   </div>
                 );
               })}
@@ -68,7 +85,7 @@ export function ProfileDataTable({
 
       {/* Desktop table layout */}
       <div className="hidden overflow-x-auto rounded-lg border border-slate-200 md:block">
-        <table className="w-full min-w-[640px] border-collapse text-left lg:min-w-[980px]">
+        <table className="w-full min-w-[800px] border-collapse text-left lg:min-w-[1100px]">
           <thead>
             <tr className="bg-slate-100 text-slate-700">
               {columns.map((column) => (
@@ -101,7 +118,11 @@ export function ProfileDataTable({
 
                     return (
                       <td key={colIndex} className="px-4 py-3 text-slate-600">
-                        {cell}
+                        {isStatus(cell) ? (
+                          <span className={`inline-flex rounded-lg border px-2.5 py-1 text-xs font-semibold ${statusColors[cell]}`}>
+                            {cell}
+                          </span>
+                        ) : cell}
                       </td>
                     );
                   })}

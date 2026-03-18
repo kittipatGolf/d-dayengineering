@@ -49,6 +49,19 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  if (type === "years") {
+    const orderYears = await prisma.$queryRaw<{ year: number }[]>`
+      SELECT DISTINCT EXTRACT(YEAR FROM "createdAt")::int AS year FROM orders ORDER BY year DESC
+    `;
+    const repairYears = await prisma.$queryRaw<{ year: number }[]>`
+      SELECT DISTINCT EXTRACT(YEAR FROM "createdAt")::int AS year FROM repair_requests ORDER BY year DESC
+    `;
+    const allYears = [...new Set([...orderYears.map((r) => r.year), ...repairYears.map((r) => r.year)])].sort((a, b) => b - a);
+    const currentYear = new Date().getFullYear();
+    if (!allYears.includes(currentYear)) allYears.unshift(currentYear);
+    return NextResponse.json(allYears);
+  }
+
   if (type === "sales") {
     const yearParam = request.nextUrl.searchParams.get("year");
     const period = request.nextUrl.searchParams.get("period") ?? "year";

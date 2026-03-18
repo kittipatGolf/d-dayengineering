@@ -188,7 +188,7 @@ export default function RegisterPage() {
           <div className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-blue-400/10 blur-3xl" />
           <div className="relative">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
-              <span className="text-lg font-black tracking-tight">DD</span>
+              <span className="text-lg font-black tracking-tight">D8</span>
             </div>
             <h2 className="mt-8 text-3xl font-bold leading-tight">
               สร้างบัญชี
@@ -220,9 +220,9 @@ export default function RegisterPage() {
           {/* Mobile header */}
           <div className="mb-6 flex items-center gap-3 lg:hidden">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-600/25">
-              <span className="text-xs font-black text-white">DD</span>
+              <span className="text-xs font-black text-white">D8</span>
             </div>
-            <span className="text-lg font-bold text-slate-900">D-Day Engineering</span>
+            <span className="text-lg font-bold text-slate-900">ดีย์แปดประตูม้วน</span>
           </div>
 
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">สมัครสมาชิก</h1>

@@ -77,10 +77,10 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/30">
-                <span className="text-sm font-black text-white">DD</span>
+                <span className="text-sm font-black text-white">D8</span>
               </div>
               <div>
-                <p className="text-base font-bold leading-tight text-white">ดีเดย์</p>
+                <p className="text-base font-bold leading-tight text-white">ดีย์แปด</p>
                 <p className="text-xs font-medium leading-tight text-slate-400">ประตูม้วน</p>
               </div>
             </div>
@@ -134,7 +134,7 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
 
           {/* Footer */}
           <div className="border-t border-slate-700/50 px-5 py-4">
-            <p className="text-[11px] text-slate-500">D-Day Engineering Admin v1.0</p>
+            <p className="text-[11px] text-slate-500">DEE8 SHUTTER DOOR Admin v1.0</p>
           </div>
         </div>
       </aside>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { HistoryAddressModal } from "../history/component/history-address-modal";
 import { ordersService } from "@/lib/services/orders.service";
 import { productCategoriesService } from "@/lib/services/product-categories.service";
@@ -34,18 +34,24 @@ export default function OrdersPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchOrders = useCallback(async () => {
+    try {
+      const rows = await ordersService.getAll();
+      setOrders(rows.filter((item) => isActiveOrderStatus(item.status)));
+    } catch {
+      setOrders([]);
+    }
+  }, []);
+
   useEffect(() => {
     Promise.all([
-      ordersService
-        .getAll()
-        .then((rows) => setOrders(rows.filter((item) => isActiveOrderStatus(item.status))))
-        .catch(() => setOrders([])),
+      fetchOrders(),
       productCategoriesService
         .getAll()
         .then((rows) => setDoorCategories(rows.filter((item) => item.kind === "ประตูม้วน")))
         .catch(() => setDoorCategories([])),
     ]).finally(() => setLoading(false));
-  }, []);
+  }, [fetchOrders]);
 
   const filteredRows = useMemo(() => {
     const q = keyword.trim().toLowerCase();
@@ -78,20 +84,15 @@ export default function OrdersPage() {
   };
 
   const changeStatus = async (id: string, status: OrderStatus) => {
-    const updated = await ordersService.updateStatus(id, status);
-    if (!updated) {
-      setOrders((prev) => prev.filter((item) => item.id !== id));
-      return;
-    }
-
-    setOrders((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    await ordersService.updateStatus(id, status);
+    await fetchOrders();
     setToast("เปลี่ยนสถานะคำสั่งซื้อสำเร็จ");
   };
 
   const saveItems = async (items: OrderItem[]) => {
     if (!selectedOrderId) return;
     const updated = await ordersService.updateItems(selectedOrderId, items);
-    setOrders((prev) => prev.map((item) => (item.id === selectedOrderId ? updated : item)));
+    await fetchOrders();
     setSelectedItems(updated.items);
     setItemsModalOpen(false);
     setToast("บันทึกรายการสินค้าสำเร็จ");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRightIcon, SparklesIcon } from "@heroicons/react/24/outline";
@@ -15,19 +15,30 @@ type ProductItem = {
   status: string;
 };
 
+type ProductTab = "ทั้งหมด" | "ประตูม้วน" | "อะไหล่";
+
 export function StoreProductsSection() {
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<ProductTab>("ทั้งหมด");
 
   useEffect(() => {
     fetch("/api/products")
       .then((r) => (r.ok ? r.json() : []))
       .then((data: ProductItem[]) =>
-        setProducts(data.filter((p) => p.status === "วางขาย").slice(0, 8)),
+        setProducts(data.filter((p) => p.status === "วางขาย")),
       )
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
   }, []);
+
+  const displayProducts = useMemo(() => {
+    if (activeTab === "ประตูม้วน") return products.filter((p) => p.kind === "ประตูม้วน").slice(0, 4);
+    if (activeTab === "อะไหล่") return products.filter((p) => p.kind === "อะไหล่").slice(0, 4);
+    return products.slice(0, 8);
+  }, [products, activeTab]);
+
+  const tabs: ProductTab[] = ["ทั้งหมด", "ประตูม้วน", "อะไหล่"];
 
   return (
     <section className="w-full space-y-8">
@@ -39,23 +50,23 @@ export function StoreProductsSection() {
             <p className="text-sm font-semibold uppercase tracking-widest text-amber-600">Featured</p>
           </div>
           <h2 className="mt-1 text-2xl font-bold text-slate-900 sm:text-4xl">สินค้าภายในร้าน</h2>
-          <p className="mt-1 text-sm text-slate-500">สินค้าแนะนำจากดีเดย์ ประตูม้วน</p>
+          <p className="mt-1 text-sm text-slate-500">สินค้าแนะนำจากดีย์แปด ประตูม้วน</p>
         </div>
-        <div className="flex gap-2">
-          <Link
-            href="/doors"
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
-          >
-            ประตูม้วน
-            <ArrowRightIcon className="h-3.5 w-3.5" />
-          </Link>
-          <Link
-            href="/parts"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
-          >
-            อะไหล่
-            <ArrowRightIcon className="h-3.5 w-3.5" />
-          </Link>
+        <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                activeTab === tab
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -69,13 +80,13 @@ export function StoreProductsSection() {
             />
           ))}
         </div>
-      ) : products.length === 0 ? (
+      ) : displayProducts.length === 0 ? (
         <p className="rounded-2xl border border-slate-200 bg-white py-16 text-center text-slate-400">
           ยังไม่มีสินค้าในขณะนี้
         </p>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {products.map((product, i) => (
+          {displayProducts.map((product, i) => (
             <Link
               key={product.id}
               href={product.kind === "ประตูม้วน" ? "/doors" : "/parts"}
