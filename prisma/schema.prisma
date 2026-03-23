@@ -98,7 +98,7 @@ model Product {
   categoryId    String
   categoryName  String
   price         Float?
-  unit          String   @default("ชิ้น")
+  unit          String   @default("ชุด")
   colors        String[] @default([])
   description   String   @default("")
   warrantyYears String   @default("")
