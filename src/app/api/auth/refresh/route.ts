@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { REFRESH_TOKEN_COOKIE, REFRESH_TOKEN_EXPIRY_DAYS } from "@/lib/auth/constants";
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth/jwt";
 import { setAuthCookies, clearAuthCookies } from "@/lib/auth/cookies";
-import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
+import { checkRateLimit, getClientIp, recordFailedAttempt } from "@/lib/auth/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -15,13 +15,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const rateLimitKey = `refresh:${ip}`;
   const refreshJwt = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
   if (!refreshJwt) {
+    recordFailedAttempt(rateLimitKey, 15 * 60 * 1000);
     return NextResponse.json({ error: "No refresh token" }, { status: 401 });
   }
 
   const payload = await verifyRefreshToken(refreshJwt);
   if (!payload) {
+    recordFailedAttempt(rateLimitKey, 15 * 60 * 1000);
     const response = NextResponse.json({ error: "Invalid refresh token" }, { status: 401 });
     return clearAuthCookies(response);
   }

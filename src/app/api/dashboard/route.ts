@@ -25,12 +25,12 @@ export async function GET(request: NextRequest) {
       prisma.order.count({ where: { status: "รอการยืนยัน" } }),
       prisma.order.count({ where: { status: "ได้รับการยืนยัน" } }),
       prisma.order.count({ where: { status: "สำเร็จ" } }),
-      prisma.order.count({ where: { status: "ไม่สำเร็จ" } }),
+      prisma.order.count({ where: { status: "ยกเลิก" } }),
       prisma.repairRequest.count(),
       prisma.repairRequest.count({ where: { status: "รอการยืนยัน" } }),
       prisma.repairRequest.count({ where: { status: "ได้รับการยืนยัน" } }),
       prisma.repairRequest.count({ where: { status: "สำเร็จ" } }),
-      prisma.repairRequest.count({ where: { status: "ไม่สำเร็จ" } }),
+      prisma.repairRequest.count({ where: { status: "ยกเลิก" } }),
       prisma.user.count(),
     ]);
 

@@ -12,6 +12,16 @@ type ProfileDataTableProps = {
   onRowClick?: (rowIndex: number) => void;
 };
 
+function statusBadgeClass(status: string): string | null {
+  switch (status) {
+    case "รอการยืนยัน": return "inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold bg-amber-50 text-amber-700";
+    case "ได้รับการยืนยัน": return "inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold bg-blue-50 text-blue-700";
+    case "สำเร็จ": return "inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700";
+    case "ยกเลิก": return "inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold bg-rose-50 text-rose-700";
+    default: return null;
+  }
+}
+
 export function ProfileDataTable({
   columns,
   rows = [],
@@ -50,10 +60,15 @@ export function ProfileDataTable({
                   );
                 }
 
+                const badge = statusBadgeClass(row[colIndex] ?? "");
                 return (
                   <div key={col} className="flex items-start gap-2 py-1">
                     <span className="shrink-0 font-semibold text-slate-700">{col}:</span>
-                    <span className="text-slate-600">{row[colIndex] ?? "-"}</span>
+                    {badge ? (
+                      <span className={badge}>{row[colIndex]}</span>
+                    ) : (
+                      <span className="text-slate-600">{row[colIndex] ?? "-"}</span>
+                    )}
                   </div>
                 );
               })}
@@ -99,9 +114,10 @@ export function ProfileDataTable({
                       );
                     }
 
+                    const badge = statusBadgeClass(cell);
                     return (
                       <td key={colIndex} className="px-4 py-3 text-slate-600">
-                        {cell}
+                        {badge ? <span className={badge}>{cell}</span> : cell}
                       </td>
                     );
                   })}

@@ -93,6 +93,9 @@ export default function RepairPage() {
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState("");
 
+  // Save address option
+  const [saveAddress, setSaveAddress] = useState(false);
+
   // Submission state
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -170,6 +173,25 @@ export default function RepairPage() {
         return;
       }
 
+      // Save address if checkbox is checked
+      if (saveAddress && !selectedAddressId) {
+        try {
+          await fetch("/api/me/addresses", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              line: addressLine,
+              province: addressFields.province,
+              district: addressFields.district,
+              subdistrict: addressFields.subdistrict,
+              postalCode: addressFields.postalCode,
+            }),
+          });
+        } catch (err) {
+          console.error("Failed to save address:", err);
+        }
+      }
+
       setSuccess(true);
     } catch (err) {
       console.error("Failed to submit repair request:", err);
@@ -217,6 +239,7 @@ export default function RepairPage() {
                 setAddressFields({ province: "", district: "", subdistrict: "", postalCode: "" });
                 setImages([]);
                 setSelectedAddressId("");
+                setSaveAddress(false);
               }}
               className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-[0.98]"
             >
@@ -328,6 +351,18 @@ export default function RepairPage() {
               inputClassName="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 placeholder:text-slate-400 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               labelClassName="font-medium text-slate-700"
             />
+
+            {user && !selectedAddressId && (
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={saveAddress}
+                  onChange={(e) => setSaveAddress(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-slate-600">บันทึกที่อยู่นี้สำหรับใช้ครั้งถัดไป</span>
+              </label>
+            )}
 
             <ImageUploadField value={images} onChange={setImages} />
 

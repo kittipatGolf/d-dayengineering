@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CategoryFilterPanel } from "@/components/category-filter-panel";
 import { SearchBar } from "@/components/search-bar";
 import { SearchableSelect } from "@/components/searchable-select";
 import { useCart } from "@/lib/cart-context";
-import { ShoppingCartIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ShoppingCartIcon, XMarkIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { ProductImageCarousel } from "@/components/product-image-carousel";
 
 type DoorPricingRow = {
@@ -40,6 +41,7 @@ type ProductItem = {
 const defaultColors = ["เงิน", "ขาว", "ครีม", "น้ำเงิน", "เทา"];
 
 export default function DoorsPage() {
+  const router = useRouter();
   const { addItem } = useCart();
 
   const [pricingRows, setPricingRows] = useState<DoorPricingRow[]>([]);
@@ -92,7 +94,7 @@ export default function DoorsPage() {
   const [thickness, setThickness] = useState("");
   const [color, setColor] = useState("");
   const [installOption, setInstallOption] = useState("ติดตั้ง");
-  const [toast, setToast] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
   const [detailProduct, setDetailProduct] = useState<ProductItem | null>(null);
 
   const matchingCategory = doorCategories.find((c) => c.name === selectedDoorType);
@@ -144,8 +146,7 @@ export default function DoorsPage() {
       warranty: "1 ปี",
     });
     setModalOpen(false);
-    setToast(true);
-    setTimeout(() => setToast(false), 2500);
+    setAddedToCart(true);
   };
 
   return (
@@ -394,10 +395,43 @@ export default function DoorsPage() {
         </div>
       )}
 
-      {toast && (
-        <div role="status" aria-live="polite" className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 flex items-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-semibold text-white shadow-lg">
-          <ShoppingCartIcon className="h-5 w-5" />
-          เพิ่มลงตะกร้าเรียบร้อย!
+      {/* ---------- Added-to-Cart Modal ---------- */}
+      {addedToCart && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setAddedToCart(false)}
+        >
+          <div
+            className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center px-6 pt-8 pb-2 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+                <CheckCircleIcon className="h-9 w-9 text-emerald-600" />
+              </div>
+              <h3 className="mt-4 text-lg font-bold text-slate-900">เพิ่มลงตะกร้าแล้ว!</h3>
+              <p className="mt-1 text-sm text-slate-500">คุณต้องการดำเนินการต่ออย่างไร?</p>
+            </div>
+            <div className="flex flex-col gap-3 p-6">
+              <button
+                type="button"
+                onClick={() => router.push("/cart")}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
+              >
+                <ShoppingCartIcon className="h-5 w-5" />
+                ไปที่ตะกร้า
+              </button>
+              <button
+                type="button"
+                onClick={() => setAddedToCart(false)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 active:scale-[0.98]"
+              >
+                เลือกซื้อต่อ
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>

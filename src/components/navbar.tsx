@@ -9,6 +9,7 @@ import {
   Bars3Icon,
   BellIcon,
   ChatBubbleLeftRightIcon,
+  ChevronDownIcon,
   Cog6ToothIcon,
   HomeIcon,
   InformationCircleIcon,
@@ -155,6 +156,7 @@ export function Navbar() {
                   {user.firstName?.charAt(0) ?? "U"}
                 </div>
                 <span className="hidden 2xl:inline">{user.firstName}</span>
+                <ChevronDownIcon className="h-3.5 w-3.5 text-slate-400" />
               </Link>
               <button
                 type="button"

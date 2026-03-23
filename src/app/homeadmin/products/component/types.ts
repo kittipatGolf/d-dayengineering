@@ -10,6 +10,7 @@ export type ProductItem = {
   categoryId: string;
   categoryName: string;
   price: number | null;
+  unit: string;
   colors: string[];
   description: string;
   warrantyYears: string;
@@ -23,6 +24,7 @@ export type ProductFormState = {
   name: string;
   categoryId: string;
   price: string;
+  unit: string;
   colors: string[];
   description: string;
   warrantyYears: string;

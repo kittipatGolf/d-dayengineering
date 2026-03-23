@@ -126,7 +126,16 @@ export function RepairRequestsTable({
 
               return (
                 <tr key={row.id} className="transition-colors hover:bg-blue-50/40">
-                  <td className="px-5 py-4 font-semibold text-slate-800">{row.username}</td>
+                  <td className="px-5 py-4">
+                    <div>
+                      <p className="font-semibold text-slate-800">
+                        {row.user ? `${row.user.firstName} ${row.user.lastName}` : row.username}
+                      </p>
+                      {row.user?.phone && (
+                        <p className="mt-0.5 text-xs text-slate-500">{row.user.phone}</p>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-5 py-4 text-slate-700">{row.repairItem}</td>
                   <td className="px-5 py-4 text-slate-700">{row.detail}</td>
                   <td className="px-5 py-4 text-slate-700">{row.repairDate}</td>

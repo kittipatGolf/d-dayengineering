@@ -11,8 +11,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
   const body = await request.json();
   const req = validateRequired(body, ["name"]);
   if (!req.valid) return NextResponse.json({ error: req.error }, { status: 400 });
-  const { name, kind, categoryId, categoryName, price, colors, description, warrantyYears, images, status } = body;
-  const data = { name, kind, categoryId, categoryName, price, colors, description, warrantyYears, images, status };
+  const { name, kind, categoryId, categoryName, price, unit, colors, description, warrantyYears, images, status } = body;
+  const data = { name, kind, categoryId, categoryName, price, unit, colors, description, warrantyYears, images, status };
 
   const product = await prisma.product.update({ where: { id }, data });
   return NextResponse.json(product);
