@@ -163,29 +163,33 @@ export function ProductFormModal({
               <span className="font-medium text-blue-800">ราคาคำนวณตามขนาดพื้นที่ (ตร.ม.)</span>
             </div>
           ) : (
-            <label className="block">
-              <span className="mb-1.5 block font-medium text-slate-600">ราคา</span>
-              <div className="flex overflow-hidden rounded-xl border border-slate-200 transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="mb-1.5 block font-medium text-slate-600">ราคา</span>
+                <div className="flex overflow-hidden rounded-xl border border-slate-200 transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20">
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.price}
+                    onChange={(e) => onFormChange({ ...form, price: e.target.value })}
+                    placeholder="0"
+                    className="w-full bg-slate-50 px-3 py-2.5 outline-none transition focus:bg-white"
+                  />
+                  <span className="flex items-center border-l border-slate-200 bg-slate-50 px-4 text-slate-500">
+                    บาท
+                  </span>
+                </div>
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block font-medium text-slate-600">หน่วย</span>
                 <input
-                  type="number"
-                  min={0}
-                  value={form.price}
-                  onChange={(e) => onFormChange({ ...form, price: e.target.value })}
-                  placeholder="0"
-                  className="w-full bg-slate-50 px-3 py-2.5 outline-none transition focus:bg-white"
-                />
-                <span className="flex items-center border-l border-slate-200 bg-slate-50 px-1 text-slate-500">
-                  บาท /
-                </span>
-                <input
-                  type="text"
                   value={form.unit}
                   onChange={(e) => onFormChange({ ...form, unit: e.target.value })}
-                  placeholder="ชิ้น"
-                  className="w-20 bg-slate-50 px-2 py-2.5 text-center outline-none transition focus:bg-white"
+                  placeholder="เช่น ชิ้น, อัน, ชุด, ตัว"
+                  className={inputClass}
                 />
-              </div>
-            </label>
+              </label>
+            </div>
           )}
         </div>
 

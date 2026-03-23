@@ -97,6 +97,13 @@ export default function DoorPricingPage() {
     return Array.from(new Set(list));
   }, [rows, form.categoryId]);
 
+  // Auto-switch to "new" mode when no existing thicknesses for selected category
+  useEffect(() => {
+    if (existingThicknesses.length === 0 && form.mode === "existing") {
+      setForm((prev) => ({ ...prev, mode: "new", selectedThickness: "" }));
+    }
+  }, [existingThicknesses.length, form.mode]);
+
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyDoorPricingForm(doorCategories[0]?.id ?? ""));

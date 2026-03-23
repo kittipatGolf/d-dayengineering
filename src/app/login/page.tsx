@@ -34,9 +34,7 @@ export default function LoginPage() {
       return;
     }
 
-    const dest = result.user?.role === "Admin" ? "/homeadmin" : "/";
-    router.push(dest);
-    router.refresh();
+    router.push(result.user?.role === "Admin" ? "/homeadmin" : "/");
   }
 
   return (

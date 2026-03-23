@@ -52,8 +52,8 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <span className="mb-1 block text-sm text-slate-700">ชื่อผู้ใช้</span>
           <input
             value={form.username}
-            onChange={(event) => onFormChange({ ...form, username: event.target.value })}
-            className={inputClass}
+            readOnly
+            className={`${inputClass} cursor-not-allowed opacity-60`}
           />
         </label>
 

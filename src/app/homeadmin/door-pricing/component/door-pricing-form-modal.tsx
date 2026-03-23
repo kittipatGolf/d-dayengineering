@@ -68,33 +68,37 @@ export function DoorPricingFormModal({
 
         <label className="block">
           <span className="mb-1 block text-slate-600">ความหนา</span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onFormChange({ ...form, mode: "existing", newThickness: "" })}
-              className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
-                form.mode === "existing"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              ใช้ความหนาที่มี
-            </button>
-            <button
-              type="button"
-              onClick={() => onFormChange({ ...form, mode: "new", selectedThickness: "" })}
-              className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
-                form.mode === "new"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              เพิ่มความหนาใหม่
-            </button>
-          </div>
+          {existingThicknesses.length > 0 ? (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => onFormChange({ ...form, mode: "existing", newThickness: "" })}
+                className={`rounded-xl px-3 py-1.5 text-xs transition ${
+                  form.mode === "existing"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                ใช้ความหนาที่มี
+              </button>
+              <button
+                type="button"
+                onClick={() => onFormChange({ ...form, mode: "new", selectedThickness: "" })}
+                className={`rounded-xl px-3 py-1.5 text-xs transition ${
+                  form.mode === "new"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                เพิ่มความหนาใหม่
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400">ยังไม่มีความหนาในประเภทนี้ — กรอกความหนาใหม่ด้านล่าง</p>
+          )}
         </label>
 
-        {form.mode === "existing" ? (
+        {form.mode === "existing" && existingThicknesses.length > 0 ? (
           <div>
             <span className="mb-1 block text-slate-600">เลือกความหนา</span>
             <SearchableSelect

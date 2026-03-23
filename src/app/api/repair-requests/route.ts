@@ -9,6 +9,7 @@ export async function GET() {
   try { await requireAdmin(); } catch (res) { return res as NextResponse; }
   const requests = await prisma.repairRequest.findMany({
     orderBy: { createdAt: "desc" },
+    include: { user: { select: { firstName: true, lastName: true, phone: true } } },
   });
   return NextResponse.json(requests);
 }

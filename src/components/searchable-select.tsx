@@ -1,7 +1,8 @@
 "use client";
 
 import { ChevronDownIcon, MagnifyingGlassIcon, CheckIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export type SelectOption = {
   value: string;
@@ -44,8 +45,11 @@ export function SearchableSelect({
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   const options = useMemo(() => normalizeOptions(rawOptions), [rawOptions]);
 
@@ -60,17 +64,53 @@ export function SearchableSelect({
     return found?.label ?? "";
   }, [options, value]);
 
-  const handleClickOutside = useCallback((e: MouseEvent) => {
-    if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-      setIsOpen(false);
-      setQuery("");
-    }
+  // Position the dropdown relative to the trigger button
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const dropUp = spaceBelow < 250 && rect.top > spaceBelow;
+
+    setDropdownStyle({
+      position: "fixed",
+      left: rect.left,
+      width: rect.width,
+      ...(dropUp
+        ? { bottom: window.innerHeight - rect.top + 6 }
+        : { top: rect.bottom + 6 }),
+      zIndex: 9999,
+    });
   }, []);
 
+  useLayoutEffect(() => {
+    if (isOpen) updatePosition();
+  }, [isOpen, updatePosition]);
+
+  // Reposition on scroll/resize
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [handleClickOutside]);
+    if (!isOpen) return;
+    const onReposition = () => updatePosition();
+    window.addEventListener("scroll", onReposition, true);
+    window.addEventListener("resize", onReposition);
+    return () => {
+      window.removeEventListener("scroll", onReposition, true);
+      window.removeEventListener("resize", onReposition);
+    };
+  }, [isOpen, updatePosition]);
+
+  // Click outside handler — checks both root and portal dropdown
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (rootRef.current?.contains(target)) return;
+      if (dropdownRef.current?.contains(target)) return;
+      setIsOpen(false);
+      setQuery("");
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && searchable && searchRef.current) {
@@ -98,6 +138,66 @@ export function SearchableSelect({
     ? "text-xs"
     : "text-sm";
 
+  const dropdownContent = isOpen ? (
+    <div
+      ref={dropdownRef}
+      style={dropdownStyle}
+      className={`overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg ${dropdownSizeClasses}`}
+    >
+      {/* Search input */}
+      {searchable && options.length > 4 && (
+        <div className="border-b border-slate-100 p-2">
+          <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+            <MagnifyingGlassIcon className="h-4 w-4 shrink-0 text-slate-400" />
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="ค้นหา..."
+              className="w-full bg-transparent text-slate-700 placeholder:text-slate-400 focus:outline-none"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Options list */}
+      <ul
+        ref={listRef}
+        className="max-h-56 overflow-y-auto overscroll-contain py-1"
+      >
+        {filtered.length === 0 ? (
+          <li className="px-4 py-3 text-center text-slate-400">
+            ไม่พบรายการที่ค้นหา
+          </li>
+        ) : (
+          filtered.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <li
+                key={opt.value}
+                className={`flex cursor-pointer items-center gap-2 px-4 py-2.5 transition ${
+                  isSelected
+                    ? "bg-blue-50 font-medium text-blue-700"
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelect(opt);
+                }}
+              >
+                <span className="flex-1 truncate">{opt.label}</span>
+                {isSelected && (
+                  <CheckIcon className="h-4 w-4 shrink-0 text-blue-600" />
+                )}
+              </li>
+            );
+          })
+        )}
+      </ul>
+    </div>
+  ) : null;
+
   return (
     <div className={`relative ${className}`} ref={rootRef}>
       {label && (
@@ -109,6 +209,7 @@ export function SearchableSelect({
       {/* Trigger button */}
       <button
         id={id}
+        ref={triggerRef}
         type="button"
         disabled={disabled}
         onClick={toggleOpen}
@@ -130,62 +231,10 @@ export function SearchableSelect({
         />
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className={`absolute z-50 mt-1.5 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg ${dropdownSizeClasses}`}>
-          {/* Search input */}
-          {searchable && options.length > 4 && (
-            <div className="border-b border-slate-100 p-2">
-              <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
-                <MagnifyingGlassIcon className="h-4 w-4 shrink-0 text-slate-400" />
-                <input
-                  ref={searchRef}
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="ค้นหา..."
-                  className="w-full bg-transparent text-slate-700 placeholder:text-slate-400 focus:outline-none"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Options list */}
-          <ul
-            ref={listRef}
-            className="max-h-56 overflow-y-auto overscroll-contain py-1"
-          >
-            {filtered.length === 0 ? (
-              <li className="px-4 py-3 text-center text-slate-400">
-                ไม่พบรายการที่ค้นหา
-              </li>
-            ) : (
-              filtered.map((opt) => {
-                const isSelected = opt.value === value;
-                return (
-                  <li
-                    key={opt.value}
-                    className={`flex cursor-pointer items-center gap-2 px-4 py-2.5 transition ${
-                      isSelected
-                        ? "bg-blue-50 font-medium text-blue-700"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }`}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleSelect(opt);
-                    }}
-                  >
-                    <span className="flex-1 truncate">{opt.label}</span>
-                    {isSelected && (
-                      <CheckIcon className="h-4 w-4 shrink-0 text-blue-600" />
-                    )}
-                  </li>
-                );
-              })
-            )}
-          </ul>
-        </div>
-      )}
+      {/* Portal dropdown to avoid overflow clipping */}
+      {typeof document !== "undefined" && dropdownContent
+        ? createPortal(dropdownContent, document.body)
+        : dropdownContent}
     </div>
   );
 }
