@@ -1,3 +1,4 @@
+import { SearchableSelect } from "@/components/searchable-select";
 import { FormModal } from "../../components/admin-shared/form-modal";
 import type { UserRole } from "./types";
 
@@ -18,6 +19,8 @@ type UserEditModalProps = {
   onSubmit: () => void;
 };
 
+const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20";
+
 export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: UserEditModalProps) {
   return (
     <FormModal
@@ -26,18 +29,18 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
       title="แก้ไขข้อมูลผู้ใช้"
       maxWidthClassName="max-w-md"
       footer={
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
             ยกเลิก
           </button>
           <button
             type="button"
             onClick={onSubmit}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
           >
             บันทึก
           </button>
@@ -49,8 +52,8 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <span className="mb-1 block text-sm text-slate-700">ชื่อผู้ใช้</span>
           <input
             value={form.username}
-            onChange={(event) => onFormChange({ ...form, username: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            readOnly
+            className={`${inputClass} cursor-not-allowed opacity-60`}
           />
         </label>
 
@@ -59,7 +62,7 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <input
             value={form.firstName}
             onChange={(event) => onFormChange({ ...form, firstName: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            className={inputClass}
           />
         </label>
 
@@ -68,7 +71,7 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <input
             value={form.lastName}
             onChange={(event) => onFormChange({ ...form, lastName: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            className={inputClass}
           />
         </label>
 
@@ -77,7 +80,7 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <input
             value={form.phone}
             onChange={(event) => onFormChange({ ...form, phone: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            className={inputClass}
           />
         </label>
 
@@ -86,23 +89,24 @@ export function UserEditModal({ open, form, onClose, onFormChange, onSubmit }: U
           <input
             value={form.email}
             onChange={(event) => onFormChange({ ...form, email: event.target.value })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
+            className={inputClass}
           />
         </label>
 
-        <label className="block">
+        <div>
           <span className="mb-1 block text-sm text-slate-700">บทบาท</span>
-          <select
+          <SearchableSelect
+            options={[
+              { value: "User", label: "User" },
+              { value: "Admin", label: "Admin" },
+            ]}
             value={form.role}
-            onChange={(event) => onFormChange({ ...form, role: event.target.value as UserRole })}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-800 outline-none focus:border-blue-500"
-          >
-            <option value="User">User</option>
-            <option value="Admin">Admin</option>
-          </select>
-        </label>
+            onChange={(v) => onFormChange({ ...form, role: v as UserRole })}
+            searchable={false}
+            size="sm"
+          />
+        </div>
       </div>
     </FormModal>
   );
 }
-

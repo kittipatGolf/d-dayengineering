@@ -11,6 +11,7 @@
     "warrantyYears": "1",
     "images": [],
     "status": "วางขาย",
+    "unit": "ตร.ม.",
     "updatedAt": "14 มี.ค. 2026"
   },
   {
@@ -25,6 +26,7 @@
     "warrantyYears": "1",
     "images": [],
     "status": "วางขาย",
+    "unit": "ชุด",
     "updatedAt": "13 มี.ค. 2026"
   }
 ]

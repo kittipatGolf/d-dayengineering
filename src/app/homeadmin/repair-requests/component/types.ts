@@ -15,5 +15,6 @@ export type RepairRequestItem = {
   warranty: string;
   repairPrice: number;
   status: RepairRequestStatus;
+  user?: { firstName: string; lastName: string; phone: string } | null;
 };
 

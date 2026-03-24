@@ -1,0 +1,261 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== Users ====================
+
+model User {
+  id                String   @id @default(cuid())
+  username          String   @unique
+  password          String
+  firstName         String
+  lastName          String
+  email             String   @unique
+  phone             String
+  role              String   @default("User") // "User" | "Admin"
+  passwordChangedAt DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  addresses           Address[]
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  orders              Order[]
+  repairRequests      RepairRequest[]
+  notifications       Notification[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id              String    @id @default(cuid())
+  token           String    @unique
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  replacedByToken String?
+  createdAt       DateTime  @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("password_reset_tokens")
+}
+
+model Address {
+  id          String @id @default(cuid())
+  line        String
+  province    String
+  district    String
+  subdistrict String
+  postalCode  String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
+// ==================== Product Categories ====================
+
+model ProductCategory {
+  id        String   @id @default(cuid())
+  name      String
+  kind      String // "ประตูม้วน" | "อะไหล่"
+  colors    String[] @default([])
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products    Product[]
+  doorPricing DoorPricing[]
+
+  @@map("product_categories")
+}
+
+// ==================== Products ====================
+
+model Product {
+  id            String   @id @default(cuid())
+  name          String
+  kind          String
+  categoryId    String
+  categoryName  String
+  price         Float?
+  unit          String   @default("ชุด")
+  colors        String[] @default([])
+  description   String   @default("")
+  warrantyYears String   @default("")
+  images        String[] @default([])
+  status        String   @default("วางขาย")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  category ProductCategory @relation(fields: [categoryId], references: [id])
+
+  @@map("products")
+}
+
+// ==================== Door Pricing ====================
+
+model DoorPricing {
+  id           String   @id @default(cuid())
+  categoryId   String
+  categoryName String
+  thickness    String
+  minArea      Float
+  maxArea      Float
+  pricePerSqm  Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category ProductCategory @relation(fields: [categoryId], references: [id])
+
+  @@map("door_pricing")
+}
+
+// ==================== Orders ====================
+
+model Order {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  firstName   String
+  lastName    String
+  phone       String
+  address     Json
+  totalAmount Float
+  status      String   @default("รอการยืนยัน")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items OrderItem[]
+
+  @@index([userId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String @id @default(cuid())
+  name          String
+  categoryName  String
+  images        String[] @default([])
+  color         String
+  widthM        Float
+  lengthM       Float
+  thickness     String
+  installOption String
+  quantity      Int
+  pricePerUnit  Float
+  warranty      String
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+// ==================== Repair Requests ====================
+
+model RepairRequest {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  username     String
+  repairType   String
+  repairItem   String
+  detail       String   @default("")
+  repairDate   String
+  address      Json
+  images       String[] @default([])
+  selectedPart String   @default("")
+  warranty     String   @default("")
+  repairPrice  Float    @default(0)
+  status       String   @default("รอการยืนยัน")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@map("repair_requests")
+}
+
+// ==================== Portfolio ====================
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  images      String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("portfolio")
+}
+
+// ==================== Notifications ====================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   @default("Admin") // "Admin" | "User" — who should see this
+  type      String   // "order" | "repair" | "status" | "user"
+  title     String
+  message   String
+  link      String   @default("")
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([role])
+  @@map("notifications")
+}
+
+// ==================== History ====================
+
+model RepairHistory {
+  id         String   @id @default(cuid())
+  username   String
+  images     String[] @default([])
+  repairType String
+  repairItem String
+  detail     String   @default("")
+  repairDate String
+  address    Json
+  status     String
+  price      Float    @default(0)
+  createdAt  DateTime @default(now())
+
+  @@map("repair_history")
+}
+
+model ProductHistory {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  phone       String
+  address     Json
+  items       Json
+  totalAmount Float
+  status      String
+  completedAt String
+  createdAt   DateTime @default(now())
+
+  @@map("product_history")
+}

@@ -1,3 +1,5 @@
+import { SearchableSelect } from "@/components/searchable-select";
+
 type PeriodOption = {
   value: string;
   label: string;
@@ -32,60 +34,38 @@ export function ReportFilterControls({
   onYearChange,
   onMonthChange,
   className = "mt-4 flex flex-wrap gap-3",
-  selectClassName = "rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200",
 }: ReportFilterControlsProps) {
   return (
     <div className={className}>
-      <label className="sr-only" htmlFor={`${idPrefix}-period`}>
-        ประเภทรายงาน
-      </label>
-      <select
+      <SearchableSelect
         id={`${idPrefix}-period`}
+        options={periodOptions.map((o) => ({ value: o.value, label: o.label }))}
         value={period}
-        onChange={(event) => onPeriodChange(event.target.value)}
-        className={selectClassName}
-      >
-        {periodOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+        onChange={onPeriodChange}
+        searchable={false}
+        size="sm"
+        className="w-32"
+      />
 
-      <label className="sr-only" htmlFor={`${idPrefix}-year`}>
-        ปี
-      </label>
-      <select
+      <SearchableSelect
         id={`${idPrefix}-year`}
-        value={year}
-        onChange={(event) => onYearChange(Number(event.target.value))}
-        className={selectClassName}
-      >
-        {years.map((yearOption) => (
-          <option key={yearOption} value={yearOption}>
-            ปี {yearOption}
-          </option>
-        ))}
-      </select>
+        options={years.map((y) => ({ value: String(y), label: `ปี ${y}` }))}
+        value={String(year)}
+        onChange={(v) => onYearChange(Number(v))}
+        searchable={false}
+        size="sm"
+        className="w-32"
+      />
 
       {showMonth && (
-        <>
-          <label className="sr-only" htmlFor={`${idPrefix}-month`}>
-            เดือน
-          </label>
-          <select
-            id={`${idPrefix}-month`}
-            value={selectedMonth}
-            onChange={(event) => onMonthChange(Number(event.target.value))}
-            className={selectClassName}
-          >
-            {monthOptions.map((month, index) => (
-              <option key={month} value={index}>
-                {month}
-              </option>
-            ))}
-          </select>
-        </>
+        <SearchableSelect
+          id={`${idPrefix}-month`}
+          options={monthOptions.map((m, i) => ({ value: String(i), label: m }))}
+          value={String(selectedMonth)}
+          onChange={(v) => onMonthChange(Number(v))}
+          size="sm"
+          className="w-32"
+        />
       )}
     </div>
   );

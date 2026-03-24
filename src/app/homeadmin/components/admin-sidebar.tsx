@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   BanknotesIcon,
@@ -61,70 +61,81 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
       {open && (
         <button
           type="button"
-          className="fixed inset-0 z-40 bg-black/35"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
           onClick={onClose}
           aria-label="ปิดเมนูผู้ดูแลระบบ"
         />
       )}
 
       <aside
-        className={`fixed left-0 top-0 z-50 h-screen w-[280px] border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 ${
+        className={`fixed left-0 top-0 z-50 h-screen w-65 sm:w-70 bg-linear-to-b from-slate-900 to-slate-950 shadow-2xl transition-transform duration-300 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col">
-        <div className="flex items-center justify-end px-4 py-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-            aria-label="ปิด sidebar"
-          >
-            <XMarkIcon className="h-6 w-6" />
-          </button>
-        </div>
-
-        <div className="mx-4 rounded-xl bg-slate-50 px-3 py-4 text-center">
-          <p className="text-3xl font-black leading-none text-blue-700">ดีเดย์</p>
-          <p className="mt-1 text-2xl font-bold leading-none text-slate-900">ประตูม้วน</p>
-        </div>
-
-        <div className="mt-4 border-t border-slate-200" />
-
-        <nav className="mt-2 flex-1 space-y-4 overflow-y-auto px-3 pb-4">
-          {menuSections.map((group) => (
-            <div key={group.section}>
-              <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                {group.section}
-              </p>
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive =
-                    item.href === "/homeadmin"
-                      ? pathname === item.href
-                      : pathname.startsWith(item.href);
-
-                  return (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      onClick={onClose}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${
-                        isActive
-                          ? "bg-blue-100 text-blue-900"
-                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5 shrink-0" />
-                      <span>{item.label}</span>
-                    </Link>
-                  );
-                })}
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/30">
+                <span className="text-sm font-black text-white">DD</span>
+              </div>
+              <div>
+                <p className="text-base font-bold leading-tight text-white">ดีเดย์</p>
+                <p className="text-xs font-medium leading-tight text-slate-400">ประตูม้วน</p>
               </div>
             </div>
-          ))}
-        </nav>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              aria-label="ปิด sidebar"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="mx-5 border-t border-slate-700/50" />
+
+          {/* Navigation */}
+          <nav className="mt-4 flex-1 space-y-5 overflow-y-auto px-4 pb-6">
+            {menuSections.map((group) => (
+              <div key={group.section}>
+                <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                  {group.section}
+                </p>
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive =
+                      item.href === "/homeadmin"
+                        ? pathname === item.href
+                        : pathname.startsWith(item.href);
+
+                    return (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        onClick={onClose}
+                        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                          isActive
+                            ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
+                            : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5 shrink-0" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </nav>
+
+          {/* Footer */}
+          <div className="border-t border-slate-700/50 px-5 py-4">
+            <p className="text-[11px] text-slate-500">D-Day Engineering Admin v1.0</p>
+          </div>
         </div>
       </aside>
     </>

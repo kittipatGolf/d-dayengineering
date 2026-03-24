@@ -1,10 +1,18 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  TagIcon,
+  WrenchScrewdriverIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
 import defaultColors from "@/mocks/data/default-colors.json";
 import { productCategoriesService } from "@/lib/services/product-categories.service";
 import { ProductCategoriesTable } from "./component/product-categories-table";
 import { ProductCategoryForm } from "./component/product-category-form";
+import { AlertModal } from "@/components/alert-modal";
+import { ConfirmModal } from "@/components/confirm-modal";
+import { SuccessToast } from "@/components/success-toast";
 import type { CategoryKind, ProductCategory } from "./component/types";
 
 function formatThaiDate(date = new Date()) {
@@ -26,15 +34,37 @@ export default function ProductCategoriesPage() {
   const [isActive, setIsActive] = useState(true);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [customColor, setCustomColor] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
+  const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    productCategoriesService.getAll().then(setCategories).catch(() => setCategories([]));
+    productCategoriesService.getAll().then((cats) => {
+      setCategories(cats.map((c) => ({
+        ...c,
+        updatedAt: c.updatedAt ? formatThaiDate(new Date(c.updatedAt)) : formatThaiDate(),
+      })));
+    }).catch(() => setCategories([])).finally(() => setLoading(false));
   }, []);
 
   const filteredRows = useMemo(() => {
-    if (activeTab === "ทั้งหมด") return categories;
-    return categories.filter((item) => item.kind === activeTab);
-  }, [activeTab, categories]);
+    let result = categories;
+    if (activeTab !== "ทั้งหมด") {
+      result = result.filter((item) => item.kind === activeTab);
+    }
+    const q = keyword.trim().toLowerCase();
+    if (q) {
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(q) ||
+          item.id.toLowerCase().includes(q) ||
+          item.kind.toLowerCase().includes(q),
+      );
+    }
+    return result;
+  }, [activeTab, categories, keyword]);
 
   const totalDoor = categories.filter((item) => item.kind === "ประตูม้วน").length;
   const totalParts = categories.filter((item) => item.kind === "อะไหล่").length;
@@ -80,9 +110,27 @@ export default function ProductCategoriesPage() {
     if (!target) return;
     const updated = await productCategoriesService.update(id, {
       isActive: !target.isActive,
-      updatedAt: formatThaiDate(),
     });
-    setCategories((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
+    setCategories((prev) => prev.map((item) => (item.id === id ? formatted : item)));
+    setToast(formatted.isActive ? "เปิดใช้งานสำเร็จ" : "ปิดใช้งานสำเร็จ");
+  };
+
+  const requestDeleteCategory = (id: string) => {
+    setPendingDeleteId(id);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!pendingDeleteId) return;
+    const id = pendingDeleteId;
+    setPendingDeleteId(null);
+    try {
+      await productCategoriesService.remove(id);
+      setCategories((prev) => prev.filter((item) => item.id !== id));
+      setToast("ลบประเภทสินค้าสำเร็จ");
+    } catch {
+      setAlertMsg("ไม่สามารถลบได้ อาจมีสินค้าอยู่ในประเภทนี้");
+    }
   };
 
   const editCategory = (id: string) => {
@@ -109,10 +157,11 @@ export default function ProductCategoriesPage() {
         kind,
         colors: kind === "ประตูม้วน" ? selectedColors : [],
         isActive,
-        updatedAt: formatThaiDate(),
       });
-      setCategories((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
+      const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
+      setCategories((prev) => prev.map((item) => (item.id === editingId ? formatted : item)));
       closeModal();
+      setToast("แก้ไขประเภทสินค้าสำเร็จ");
       return;
     }
 
@@ -122,44 +171,85 @@ export default function ProductCategoriesPage() {
       colors: kind === "ประตูม้วน" ? selectedColors : [],
       isActive,
     });
-    setCategories((prev) => [created, ...prev]);
+    const formatted = { ...created, updatedAt: formatThaiDate(new Date(created.updatedAt)) };
+    setCategories((prev) => [formatted, ...prev]);
     closeModal();
+    setToast("เพิ่มประเภทสินค้าสำเร็จ");
   };
 
   return (
-    <div className="rounded-3xl border border-slate-300 bg-slate-100 p-3 shadow-sm md:p-4">
-      <header className="rounded-2xl bg-linear-to-r from-blue-900 to-blue-700 px-5 py-5 text-white shadow-sm">
-        <h1 className="text-2xl font-bold">จัดการประเภทสินค้า</h1>
-        <p className="mt-1 text-sm text-blue-100">
-          จัดการประเภทประตูม้วนและอะไหล่ เพื่อใช้งานต่อในหน้าจัดการออเดอร์
-        </p>
+    <div className="space-y-5">
+      <header className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-6 py-6 text-white shadow-lg">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold">จัดการประเภทสินค้า</h1>
+          <p className="mt-1 text-sm text-blue-200/80">
+            จัดการประเภทประตูม้วนและอะไหล่ เพื่อใช้งานต่อในหน้าจัดการออเดอร์
+          </p>
+        </div>
       </header>
 
-      <section className="mt-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-slate-500">ประเภททั้งหมด</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{categories.length}</p>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
         </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-slate-500">ประเภทประตูม้วน</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{totalDoor}</p>
-        </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-slate-500">ประเภทอะไหล่</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{totalParts}</p>
-        </div>
-      </section>
+      ) : (
+        <>
+          <section className="grid gap-4 sm:grid-cols-3">
+            {([
+              { label: "ประเภททั้งหมด", value: categories.length, icon: TagIcon, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100", accent: "bg-blue-600" },
+              { label: "ประเภทประตูม้วน", value: totalDoor, icon: WrenchScrewdriverIcon, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100", accent: "bg-indigo-500" },
+              { label: "ประเภทอะไหล่", value: totalParts, icon: Cog6ToothIcon, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100", accent: "bg-emerald-500" },
+            ] as const).map((card) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={card.label}
+                  className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className={`absolute left-0 top-0 h-full w-1 ${card.accent}`} />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-slate-500">{card.label}</p>
+                      <p className={`mt-1.5 text-3xl font-bold tracking-tight ${card.color}`}>
+                        {card.value.toLocaleString("th-TH")}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">รายการ</p>
+                    </div>
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.bg} ${card.border} border`}>
+                      <Icon className={`h-6 w-6 ${card.color}`} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </section>
 
-      <section className="mt-4">
-        <ProductCategoriesTable
-          rows={filteredRows}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onToggleStatus={toggleCategoryStatus}
-          onAddNew={openCreateModal}
-          onEdit={editCategory}
-        />
-      </section>
+          <section>
+            <ProductCategoriesTable
+              rows={filteredRows}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onToggleStatus={toggleCategoryStatus}
+              onAddNew={openCreateModal}
+              onEdit={editCategory}
+              onDelete={requestDeleteCategory}
+              keyword={keyword}
+              onKeywordChange={setKeyword}
+            />
+          </section>
+        </>
+      )}
+
+      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
+      <AlertModal open={!!alertMsg} message={alertMsg ?? ""} onClose={() => setAlertMsg(null)} />
+      <ConfirmModal
+        open={!!pendingDeleteId}
+        message="ต้องการลบประเภทสินค้านี้หรือไม่?"
+        confirmText="ลบ"
+        onConfirm={confirmDeleteCategory}
+        onCancel={() => setPendingDeleteId(null)}
+      />
 
       <ProductCategoryForm
         open={modalOpen}

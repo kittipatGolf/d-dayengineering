@@ -10,9 +10,9 @@ export function DashboardStatCard({
   valueColor,
 }: DashboardStatCardProps) {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-sm font-medium text-slate-600">{title}</p>
-      <p className={`mt-4 text-3xl font-bold ${valueColor}`}>{value}</p>
+    <article className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <p className="text-sm font-medium text-slate-500">{title}</p>
+      <p className={`mt-3 text-2xl font-bold ${valueColor}`}>{value}</p>
     </article>
   );
 }

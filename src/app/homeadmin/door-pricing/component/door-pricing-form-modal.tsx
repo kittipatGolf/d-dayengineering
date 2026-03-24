@@ -1,4 +1,5 @@
-﻿import { FormModal } from "../../components/admin-shared/form-modal";
+import { SearchableSelect } from "@/components/searchable-select";
+import { FormModal } from "../../components/admin-shared/form-modal";
 import type { ProductCategory } from "../../product-categories/component/types";
 import type { DoorPricingFormState } from "./types";
 
@@ -30,90 +31,84 @@ export function DoorPricingFormModal({
       onClose={onClose}
       maxWidthClassName="max-w-3xl"
       footer={
-        <>
+        <div className="flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-rose-600 px-4 py-2 font-semibold text-white transition hover:bg-rose-700"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
             ยกเลิก
           </button>
           <button
             type="button"
             onClick={onSubmit}
-            className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+            className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
           >
             {editing ? "บันทึกการแก้ไข" : "บันทึก"}
           </button>
-        </>
+        </div>
       }
     >
       <div className="space-y-4 text-sm">
-        <label className="block">
+        <div>
           <span className="mb-1 block text-slate-600">ประเภทสินค้า (จากจัดการประเภทสินค้า)</span>
-          <select
+          <SearchableSelect
+            options={doorCategories.map((item) => ({ value: item.id, label: item.name }))}
             value={form.categoryId}
-            onChange={(e) =>
+            onChange={(v) =>
               onFormChange({
                 ...form,
-                categoryId: e.target.value,
+                categoryId: v,
                 selectedThickness: "",
               })
             }
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
-          >
-            {doorCategories.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            size="sm"
+          />
+        </div>
 
         <label className="block">
           <span className="mb-1 block text-slate-600">ความหนา</span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onFormChange({ ...form, mode: "existing", newThickness: "" })}
-              className={`rounded-lg px-3 py-1.5 text-xs transition ${
-                form.mode === "existing"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-slate-100 text-slate-600"
-              }`}
-            >
-              ใช้ความหนาที่มี
-            </button>
-            <button
-              type="button"
-              onClick={() => onFormChange({ ...form, mode: "new", selectedThickness: "" })}
-              className={`rounded-lg px-3 py-1.5 text-xs transition ${
-                form.mode === "new"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-slate-100 text-slate-600"
-              }`}
-            >
-              เพิ่มความหนาใหม่
-            </button>
-          </div>
+          {existingThicknesses.length > 0 ? (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => onFormChange({ ...form, mode: "existing", newThickness: "" })}
+                className={`rounded-xl px-3 py-1.5 text-xs transition ${
+                  form.mode === "existing"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                ใช้ความหนาที่มี
+              </button>
+              <button
+                type="button"
+                onClick={() => onFormChange({ ...form, mode: "new", selectedThickness: "" })}
+                className={`rounded-xl px-3 py-1.5 text-xs transition ${
+                  form.mode === "new"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                เพิ่มความหนาใหม่
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400">ยังไม่มีความหนาในประเภทนี้ — กรอกความหนาใหม่ด้านล่าง</p>
+          )}
         </label>
 
-        {form.mode === "existing" ? (
-          <label className="block">
+        {form.mode === "existing" && existingThicknesses.length > 0 ? (
+          <div>
             <span className="mb-1 block text-slate-600">เลือกความหนา</span>
-            <select
+            <SearchableSelect
+              placeholder="เลือกความหนา"
+              options={existingThicknesses}
               value={form.selectedThickness}
-              onChange={(e) => onFormChange({ ...form, selectedThickness: e.target.value })}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
-            >
-              <option value="">เลือกความหนา</option>
-              {existingThicknesses.map((thickness) => (
-                <option key={thickness} value={thickness}>
-                  {thickness}
-                </option>
-              ))}
-            </select>
-          </label>
+              onChange={(v) => onFormChange({ ...form, selectedThickness: v })}
+              size="sm"
+            />
+          </div>
         ) : (
           <label className="block">
             <span className="mb-1 block text-slate-600">ความหนาใหม่</span>
@@ -121,7 +116,7 @@ export function DoorPricingFormModal({
               value={form.newThickness}
               onChange={(e) => onFormChange({ ...form, newThickness: e.target.value })}
               placeholder="เช่น 0.8-0.9 mm (เบอร์ 21)"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
             />
           </label>
         )}
@@ -134,7 +129,7 @@ export function DoorPricingFormModal({
               min={0}
               value={form.minArea}
               onChange={(e) => onFormChange({ ...form, minArea: e.target.value })}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
             />
           </label>
 
@@ -145,20 +140,20 @@ export function DoorPricingFormModal({
               min={0}
               value={form.maxArea}
               onChange={(e) => onFormChange({ ...form, maxArea: e.target.value })}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none ring-blue-200 transition focus:ring"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
             />
           </label>
         </div>
 
         <label className="block">
           <span className="mb-1 block text-slate-600">ราคา / ตร.ม.</span>
-          <div className="flex rounded-lg border border-slate-200">
+          <div className="flex overflow-hidden rounded-xl border border-slate-200">
             <input
               type="number"
               min={0}
               value={form.pricePerSqm}
               onChange={(e) => onFormChange({ ...form, pricePerSqm: e.target.value })}
-              className="w-full rounded-l-lg px-3 py-2 outline-none"
+              className="w-full bg-slate-50 px-3 py-2.5 outline-none transition focus:bg-white"
             />
             <span className="flex items-center border-l border-slate-200 bg-slate-50 px-3 text-slate-500">
               บาท

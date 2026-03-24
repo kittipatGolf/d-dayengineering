@@ -1,4 +1,3 @@
-﻿import type { UploadedImage } from "@/lib/upload/upload.types";
 import type { CategoryKind } from "../../product-categories/component/types";
 
 export type ProductStatus = "วางขาย" | "ยกเลิกการขาย";
@@ -11,10 +10,11 @@ export type ProductItem = {
   categoryId: string;
   categoryName: string;
   price: number | null;
+  unit: string;
   colors: string[];
   description: string;
   warrantyYears: string;
-  images: UploadedImage[];
+  images: string[];
   status: ProductStatus;
   updatedAt: string;
 };
@@ -24,9 +24,10 @@ export type ProductFormState = {
   name: string;
   categoryId: string;
   price: string;
+  unit: string;
   colors: string[];
   description: string;
   warrantyYears: string;
   isSelling: boolean;
-  images: UploadedImage[];
+  images: string[];
 };

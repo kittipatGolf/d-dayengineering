@@ -7,6 +7,8 @@ import type { CategoryKind, ProductCategory } from "../product-categories/compon
 import { ProductFormModal } from "./component/product-form";
 import { ProductStats } from "./component/product-stats";
 import { ProductsTable } from "./component/products-table";
+import { AlertModal } from "@/components/alert-modal";
+import { SuccessToast } from "@/components/success-toast";
 import type { ProductFormState, ProductItem, ProductTab } from "./component/types";
 
 function formatThaiDate(date = new Date()) {
@@ -27,6 +29,7 @@ function emptyProductForm(type: CategoryKind, categoryId: string): ProductFormSt
     name: "",
     categoryId,
     price: "",
+    unit: "ชุด",
     colors: [],
     description: "",
     warrantyYears: "",
@@ -44,19 +47,29 @@ export default function ProductsPage() {
   const [form, setForm] = useState<ProductFormState>(() =>
     emptyProductForm("ประตูม้วน", ""),
   );
+  const [keyword, setKeyword] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
+  const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    productCategoriesService
-      .getAll()
-      .then((data) => {
-        const active = data.filter((item) => item.isActive);
-        setAllActiveCategories(active);
-        const firstDoorCategory = active.find((item) => item.kind === "ประตูม้วน");
-        setForm((prev) => ({ ...prev, categoryId: firstDoorCategory?.id ?? "" }));
-      })
-      .catch(() => setAllActiveCategories([]));
-
-    productsService.getAll().then(setProducts).catch(() => setProducts([]));
+    Promise.all([
+      productCategoriesService
+        .getAll()
+        .then((data) => {
+          const active = data.filter((item) => item.isActive);
+          setAllActiveCategories(active);
+          const firstDoorCategory = active.find((item) => item.kind === "ประตูม้วน");
+          setForm((prev) => ({ ...prev, categoryId: firstDoorCategory?.id ?? "" }));
+        })
+        .catch(() => setAllActiveCategories([])),
+      productsService.getAll().then((data) => {
+        setProducts(data.map((p) => ({
+          ...p,
+          updatedAt: p.updatedAt ? formatThaiDate(new Date(p.updatedAt)) : formatThaiDate(),
+        })));
+      }).catch(() => setProducts([])),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const categoryOptions = useMemo(
@@ -72,12 +85,24 @@ export default function ProductsPage() {
   const availableColors = selectedCategory?.kind === "ประตูม้วน" ? selectedCategory.colors : [];
 
   const filteredProducts = useMemo(() => {
-    if (activeTab === "ทั้งหมด") return products;
+    let result = products;
     if (activeTab === "ประตูม้วน") {
-      return products.filter((item) => item.kind === "ประตูม้วน");
+      result = result.filter((item) => item.kind === "ประตูม้วน");
+    } else if (activeTab !== "ทั้งหมด") {
+      result = result.filter((item) => item.kind === "อะไหล่");
     }
-    return products.filter((item) => item.kind === "อะไหล่");
-  }, [activeTab, products]);
+    const q = keyword.trim().toLowerCase();
+    if (q) {
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(q) ||
+          item.categoryName.toLowerCase().includes(q) ||
+          item.id.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q),
+      );
+    }
+    return result;
+  }, [activeTab, products, keyword]);
 
   const sellingCount = products.filter((item) => item.status === "วางขาย").length;
 
@@ -125,9 +150,10 @@ export default function ProductsPage() {
     if (!target) return;
     const updated = await productsService.update(id, {
       status: target.status === "วางขาย" ? "ยกเลิกการขาย" : "วางขาย",
-      updatedAt: formatThaiDate(),
     });
-    setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
+    setProducts((prev) => prev.map((item) => (item.id === id ? formatted : item)));
+    setToast(formatted.status === "วางขาย" ? "เปิดวางขายสำเร็จ" : "ยกเลิกการขายสำเร็จ");
   };
 
   const editProduct = (id: string) => {
@@ -140,6 +166,7 @@ export default function ProductsPage() {
       name: target.name,
       categoryId: target.categoryId,
       price: target.price ? String(target.price) : "",
+      unit: target.unit || "ชุด",
       colors: target.colors,
       description: target.description,
       warrantyYears: target.warrantyYears,
@@ -155,9 +182,10 @@ export default function ProductsPage() {
     const isDoor = form.productType === "ประตูม้วน";
     const price = Number(form.price);
 
-    if (!name || !category || category.kind !== form.productType) return;
-    if (isDoor && form.colors.length === 0) return;
-    if (!isDoor && (!Number.isFinite(price) || price <= 0)) return;
+    if (!name) { setAlertMsg("กรุณากรอกชื่อสินค้า"); return; }
+    if (!category) { setAlertMsg("กรุณาเลือกหมวดหมู่สินค้า"); return; }
+    if (isDoor && form.colors.length === 0) { setAlertMsg("กรุณาเลือกสีอย่างน้อย 1 สี"); return; }
+    if (!isDoor && (!Number.isFinite(price) || price <= 0)) { setAlertMsg("กรุณากรอกราคาสินค้า"); return; }
 
     const payload = {
       name,
@@ -165,48 +193,70 @@ export default function ProductsPage() {
       categoryId: category.id,
       categoryName: category.name,
       price: isDoor ? null : price,
+      unit: isDoor ? "ตร.ม." : form.unit.trim() || "ชุด",
       colors: isDoor ? form.colors : [],
       description: form.description.trim(),
       warrantyYears: form.warrantyYears.trim(),
       images: form.images,
-      status: form.isSelling ? "วางขาย" : "ยกเลิกการขาย",
-      updatedAt: formatThaiDate(),
-    } as const;
+      status: form.isSelling ? "วางขาย" as const : "ยกเลิกการขาย" as const,
+    };
 
-    if (editingId) {
-      const updated = await productsService.update(editingId, payload);
-      setProducts((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
+    try {
+      if (editingId) {
+        const updated = await productsService.update(editingId, payload);
+        const formatted = { ...updated, updatedAt: formatThaiDate(new Date(updated.updatedAt)) };
+        setProducts((prev) => prev.map((item) => (item.id === editingId ? formatted : item)));
+        closeModal();
+        setToast("แก้ไขสินค้าสำเร็จ");
+        return;
+      }
+
+      const created = await productsService.create(payload);
+      const formatted = { ...created, updatedAt: formatThaiDate(new Date(created.updatedAt)) };
+      setProducts((prev) => [formatted, ...prev]);
       closeModal();
-      return;
+      setToast("เพิ่มสินค้าสำเร็จ");
+    } catch (err) {
+      setAlertMsg("เกิดข้อผิดพลาด: " + (err instanceof Error ? err.message : "ไม่สามารถบันทึกได้"));
     }
-
-    const created = await productsService.create(payload);
-    setProducts((prev) => [created, ...prev]);
-    closeModal();
   };
 
   return (
-    <div className="rounded-3xl border border-slate-300 bg-slate-100 p-3 shadow-sm md:p-4">
-      <header className="rounded-2xl bg-linear-to-r from-blue-900 to-blue-700 px-5 py-5 text-white shadow-sm">
-        <h1 className="text-2xl font-bold">จัดการสินค้า</h1>
-        <p className="mt-1 text-sm text-blue-100">
-          เพิ่ม/แก้ไขสินค้าผ่าน modal และจัดการสถานะวางขายได้ทันที
-        </p>
+    <div className="space-y-5">
+      <header className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-6 py-6 text-white shadow-lg">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold">จัดการสินค้า</h1>
+          <p className="mt-1 text-sm text-blue-200/80">
+            เพิ่ม/แก้ไขสินค้าผ่าน modal และจัดการสถานะวางขายได้ทันที
+          </p>
+        </div>
       </header>
 
       <ProductStats total={products.length} selling={sellingCount} />
 
-      <section className="mt-4">
-        <ProductsTable
-          rows={filteredProducts}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onToggleStatus={toggleProductStatus}
-          onEdit={editProduct}
-          onAddNew={openCreateModal}
-          toCurrency={toCurrency}
-        />
+      <section>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+          </div>
+        ) : (
+          <ProductsTable
+            rows={filteredProducts}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onToggleStatus={toggleProductStatus}
+            onEdit={editProduct}
+            onAddNew={openCreateModal}
+            toCurrency={toCurrency}
+            keyword={keyword}
+            onKeywordChange={setKeyword}
+          />
+        )}
       </section>
+
+      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
+      <AlertModal open={!!alertMsg} message={alertMsg ?? ""} onClose={() => setAlertMsg(null)} variant="warning" />
 
       <ProductFormModal
         open={modalOpen}

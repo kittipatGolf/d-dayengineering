@@ -6,6 +6,7 @@ import { UserAddressEditModal } from "./component/user-address-edit-modal";
 import { UserAddressesModal } from "./component/user-addresses-modal";
 import { UserEditModal } from "./component/user-edit-modal";
 import { UsersTable } from "./component/users-table";
+import { SuccessToast } from "@/components/success-toast";
 import type { AdminUser, UserAddress, UserRole } from "./component/types";
 
 type UserEditState = {
@@ -53,9 +54,11 @@ export default function UsersPage() {
   const [addressEditModalOpen, setAddressEditModalOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [addressForm, setAddressForm] = useState<AddressEditState>(EMPTY_ADDRESS_EDIT_STATE);
+  const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    usersService.getAll().then(setUsers).catch(() => setUsers([]));
+    usersService.getAll().then(setUsers).catch(() => setUsers([])).finally(() => setLoading(false));
   }, []);
 
   const filteredUsers = useMemo(() => {
@@ -116,11 +119,13 @@ export default function UsersPage() {
     const updated = await usersService.update(editingUserId, editForm);
     setUsers((prev) => prev.map((item) => (item.id === editingUserId ? updated : item)));
     closeEditModal();
+    setToast("แก้ไขข้อมูลผู้ใช้สำเร็จ");
   };
 
   const deleteUser = async (id: string) => {
     await usersService.remove(id);
     setUsers((prev) => prev.filter((item) => item.id !== id));
+    setToast("ลบผู้ใช้สำเร็จ");
   };
 
   const openAddressEditModal = (address: UserAddress) => {
@@ -153,6 +158,7 @@ export default function UsersPage() {
     setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
     setSelectedUserForAddress(updatedUser);
     closeAddressEditModal();
+    setToast("แก้ไขที่อยู่สำเร็จ");
   };
 
   const deleteAddress = async (addressId: string) => {
@@ -161,18 +167,33 @@ export default function UsersPage() {
     const updatedUser = await usersService.updateAddresses(selectedUserForAddress.id, nextAddresses);
     setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
     setSelectedUserForAddress(updatedUser);
+    setToast("ลบที่อยู่สำเร็จ");
   };
 
   return (
-    <div className="rounded-3xl border border-slate-300 bg-slate-100 p-3 shadow-sm md:p-4">
-      <UsersTable
-        rows={filteredUsers}
-        keyword={keyword}
-        onKeywordChange={setKeyword}
-        onViewAddresses={openAddressModal}
-        onEdit={openEditModal}
-        onDelete={deleteUser}
-      />
+    <div className="space-y-5">
+      <header className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-6 py-6 text-white shadow-lg">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold">จัดการสมาชิก</h1>
+          <p className="mt-1 text-sm text-blue-200/80">ดูข้อมูล แก้ไข และจัดการที่อยู่ของสมาชิกทั้งหมดในระบบ</p>
+        </div>
+      </header>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+        </div>
+      ) : (
+        <UsersTable
+          rows={filteredUsers}
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onViewAddresses={openAddressModal}
+          onEdit={openEditModal}
+          onDelete={deleteUser}
+        />
+      )}
 
       <UserAddressesModal
         open={addressModalOpen}
@@ -188,6 +209,8 @@ export default function UsersPage() {
         onFormChange={setAddressForm}
         onSubmit={saveAddressEdit}
       />
+      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
+
       <UserEditModal
         open={editModalOpen}
         form={editForm}

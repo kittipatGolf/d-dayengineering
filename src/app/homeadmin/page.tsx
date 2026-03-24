@@ -1,46 +1,27 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
 import { DashboardOverviewSection } from "./components/dashboard/dashboard-overview-section";
-import { NotificationModal } from "./components/notification/notification-modal";
 import { RepairOverviewPanel } from "./components/repair/repair-overview-panel";
 import { UserStatisticsPanel } from "./components/user-statistics/user-statistics-panel";
 
 export default function HomeAdminPage() {
-  const [notificationOpen, setNotificationOpen] = useState(false);
-
   return (
-    <div className="rounded-3xl border border-slate-300 bg-slate-100 p-3 shadow-sm md:p-4">
-      <header className="rounded-2xl bg-linear-to-r from-blue-900 to-blue-700 px-5 py-5 text-white shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm text-blue-100">แดชบอร์ด</p>
-            <h1 className="text-2xl font-bold">ผู้ดูแลระบบ</h1>
-          </div>
-          <button
-            type="button"
-            onClick={() => setNotificationOpen(true)}
-            className="rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-amber-950 transition hover:bg-amber-300"
-          >
-            แจ้งเตือน
-          </button>
+    <div className="space-y-5">
+      <header className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-6 py-7 text-white shadow-lg md:px-8">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl" />
+        <div className="relative">
+          <p className="text-sm font-medium text-blue-200">แดชบอร์ด</p>
+          <h1 className="mt-1 text-2xl font-bold md:text-3xl">ยินดีต้อนรับ, ผู้ดูแลระบบ</h1>
+          <p className="mt-2 text-sm text-blue-200/70">ภาพรวมข้อมูลทั้งหมดของร้านดีเดย์ ประตูม้วน</p>
         </div>
       </header>
 
       <DashboardOverviewSection />
 
-      <div className="mt-4">
-        <RepairOverviewPanel />
-      </div>
+      <RepairOverviewPanel />
 
-      <div className="mt-4">
-        <UserStatisticsPanel />
-      </div>
-
-      <NotificationModal
-        open={notificationOpen}
-        onClose={() => setNotificationOpen(false)}
-      />
+      <UserStatisticsPanel />
     </div>
   );
 }

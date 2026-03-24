@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { AdminSidebar } from "./components/admin-sidebar";
@@ -10,10 +10,10 @@ export default function HomeAdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <section className="min-h-screen bg-slate-200/70">
+    <section className="min-h-screen bg-slate-100">
       <AdminTopbar onMenuClick={() => setSidebarOpen(true)} />
       <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="px-3 py-4 md:px-4">{children}</div>
+      <div className="px-4 py-5 md:px-6">{children}</div>
     </section>
   );
 }

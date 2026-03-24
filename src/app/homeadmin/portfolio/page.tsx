@@ -6,6 +6,7 @@ import { emptyPortfolioForm } from "./component/form-defaults";
 import { PortfolioCard } from "./component/portfolio-card";
 import { PortfolioFormModal } from "./component/portfolio-form-modal";
 import { PortfolioToolbar } from "./component/portfolio-toolbar";
+import { SuccessToast } from "@/components/success-toast";
 import type { PortfolioFormState, PortfolioItem } from "./component/types";
 
 export default function PortfolioPage() {
@@ -14,9 +15,11 @@ export default function PortfolioPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<PortfolioFormState>(emptyPortfolioForm);
+  const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    portfolioService.getAll().then(setItems).catch(() => setItems([]));
+    portfolioService.getAll().then(setItems).catch(() => setItems([])).finally(() => setLoading(false));
   }, []);
 
   const filteredItems = useMemo(() => {
@@ -43,17 +46,7 @@ export default function PortfolioPage() {
     setForm({
       title: target.title,
       description: target.description,
-      images: target.image
-        ? [
-            {
-              id: `${target.id}-cover`,
-              url: target.image,
-              name: "cover",
-              size: 0,
-              mimeType: "image/*",
-            },
-          ]
-        : [],
+      images: target.images ?? [],
     });
     setModalOpen(true);
   };
@@ -66,50 +59,66 @@ export default function PortfolioPage() {
   const handleDelete = async (id: string) => {
     await portfolioService.remove(id);
     setItems((prev) => prev.filter((item) => item.id !== id));
+    setToast("ลบผลงานสำเร็จ");
   };
 
   const handleSubmit = async () => {
     const title = form.title.trim();
     const description = form.description.trim();
-    const image = form.images[0]?.url ?? "";
+    const images = form.images;
 
-    if (!title || !description || !image) return;
+    if (!title || !description || images.length === 0) return;
 
     if (editingId) {
-      const updated = await portfolioService.update(editingId, { title, description, image });
+      const updated = await portfolioService.update(editingId, { title, description, images });
       setItems((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
       closeModal();
+      setToast("แก้ไขผลงานสำเร็จ");
       return;
     }
 
-    const created = await portfolioService.create({ title, description, image });
+    const created = await portfolioService.create({ title, description, images });
     setItems((prev) => [created, ...prev]);
     closeModal();
+    setToast("เพิ่มผลงานสำเร็จ");
   };
 
   return (
-    <div className="rounded-3xl border border-slate-300 bg-slate-100 p-3 shadow-sm md:p-4">
-      <header className="rounded-2xl bg-linear-to-r from-blue-900 to-blue-700 px-5 py-5 text-white shadow-sm">
-        <h1 className="text-2xl font-bold">การจัดการผลงาน</h1>
-        <p className="mt-1 text-sm text-blue-100">เพิ่ม แก้ไข และจัดเรียงผลงานให้ดูเป็นระบบ</p>
+    <div className="space-y-5">
+      <header className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-6 py-6 text-white shadow-lg">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold">การจัดการผลงาน</h1>
+          <p className="mt-1 text-sm text-blue-200/80">เพิ่ม แก้ไข และจัดเรียงผลงานให้ดูเป็นระบบ</p>
+        </div>
       </header>
 
       <PortfolioToolbar query={query} onQueryChange={setQuery} onAdd={openCreate} />
 
-      <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filteredItems.map((item) => (
-          <PortfolioCard
-            key={item.id}
-            item={item}
-            onEdit={openEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </section>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
+        </div>
+      ) : (
+        <>
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredItems.map((item) => (
+              <PortfolioCard
+                key={item.id}
+                item={item}
+                onEdit={openEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </section>
 
-      <div className="mt-5 text-sm text-slate-500">
-        Showing 1 - {filteredItems.length} of {filteredItems.length}
-      </div>
+          <div className="mt-5 text-sm text-slate-500">
+            Showing 1 - {filteredItems.length} of {filteredItems.length}
+          </div>
+        </>
+      )}
+
+      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
 
       <PortfolioFormModal
         open={modalOpen}

@@ -1,9 +1,7 @@
 "use client";
 
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useEffect, useMemo, useState } from "react";
 import { HistoryAddressModal } from "../history/component/history-address-modal";
-import { FilterTabs } from "../components/admin-shared/filter-tabs";
 import { ordersService } from "@/lib/services/orders.service";
 import { productCategoriesService } from "@/lib/services/product-categories.service";
 import { OrderItemsModal } from "./component/order-items-modal";
@@ -11,6 +9,7 @@ import { OrderQuoteModal } from "./component/order-quote-modal";
 import { OrdersTable } from "./component/orders-table";
 import type { HistoryAddress } from "../history/component/types";
 import type { OrderItem, OrderRecord, OrderStatus } from "./component/types";
+import { SuccessToast } from "@/components/success-toast";
 import type { ProductCategory } from "../product-categories/component/types";
 
 type ActiveTab = "ทั้งหมด" | "รอการยืนยัน" | "ได้รับการยืนยัน";
@@ -32,17 +31,20 @@ export default function OrdersPage() {
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [selectedOrderForQuote, setSelectedOrderForQuote] = useState<OrderRecord | null>(null);
   const [doorCategories, setDoorCategories] = useState<ProductCategory[]>([]);
+  const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    ordersService
-      .getAll()
-      .then((rows) => setOrders(rows.filter((item) => isActiveOrderStatus(item.status))))
-      .catch(() => setOrders([]));
-
-    productCategoriesService
-      .getAll()
-      .then((rows) => setDoorCategories(rows.filter((item) => item.kind === "ประตูม้วน")))
-      .catch(() => setDoorCategories([]));
+    Promise.all([
+      ordersService
+        .getAll()
+        .then((rows) => setOrders(rows.filter((item) => isActiveOrderStatus(item.status))))
+        .catch(() => setOrders([])),
+      productCategoriesService
+        .getAll()
+        .then((rows) => setDoorCategories(rows.filter((item) => item.kind === "ประตูม้วน")))
+        .catch(() => setDoorCategories([])),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -83,6 +85,7 @@ export default function OrdersPage() {
     }
 
     setOrders((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    setToast("เปลี่ยนสถานะคำสั่งซื้อสำเร็จ");
   };
 
   const saveItems = async (items: OrderItem[]) => {
@@ -91,6 +94,7 @@ export default function OrdersPage() {
     setOrders((prev) => prev.map((item) => (item.id === selectedOrderId ? updated : item)));
     setSelectedItems(updated.items);
     setItemsModalOpen(false);
+    setToast("บันทึกรายการสินค้าสำเร็จ");
   };
 
   const getColorOptions = (item: OrderItem) => {
@@ -102,41 +106,34 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="rounded-3xl border border-slate-300 bg-slate-100 p-3 shadow-sm md:p-4">
-      <header className="rounded-2xl bg-linear-to-r from-blue-900 to-blue-700 px-5 py-5 text-white shadow-sm">
-        <h1 className="text-2xl font-bold">การจัดการคำสั่งซื้อ</h1>
-        <p className="mt-1 text-sm text-blue-100">
-          จัดการออเดอร์ที่กำลังดำเนินการ และเปลี่ยนสถานะได้ทันทีจากตาราง
-        </p>
+    <div className="space-y-5">
+      <header className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 px-6 py-6 text-white shadow-lg">
+        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold">การจัดการคำสั่งซื้อ</h1>
+          <p className="mt-1 text-sm text-blue-200/80">
+            จัดการออเดอร์ที่กำลังดำเนินการ และเปลี่ยนสถานะได้ทันทีจากตาราง
+          </p>
+        </div>
       </header>
 
-      <section className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <FilterTabs
-            options={["ทั้งหมด", "รอการยืนยัน", "ได้รับการยืนยัน"] as const}
-            value={tab}
-            onChange={setTab}
-            className="mt-0 grow"
-          />
-          <label className="relative block w-full max-w-[300px]">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-            <input
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder="ค้นหาข้อมูลคำสั่งซื้อ"
-              className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 outline-none transition focus:border-blue-500"
-            />
-          </label>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="h-7 w-7 animate-spin rounded-full border-3 border-slate-200 border-t-blue-600" />
         </div>
-
+      ) : (
         <OrdersTable
           rows={filteredRows}
+          activeTab={tab}
+          onTabChange={setTab}
+          keyword={keyword}
+          onKeywordChange={setKeyword}
           onOpenAddress={openAddress}
           onOpenItems={openItems}
           onOpenSummary={openSummary}
           onChangeStatus={changeStatus}
         />
-      </section>
+      )}
 
       <HistoryAddressModal
         open={addressModalOpen}
@@ -155,6 +152,8 @@ export default function OrdersPage() {
         onClose={() => setItemsModalOpen(false)}
         onSave={saveItems}
       />
+      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
+
       <OrderQuoteModal
         open={quoteModalOpen}
         order={selectedOrderForQuote}
